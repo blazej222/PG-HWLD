@@ -18,11 +18,11 @@ class Network:
 
     def create_cnn(self):
         cnn = Sequential(
-            [Conv2D(28, (3, 3), activation='relu', input_shape=(28, 28, 3)),
+            [Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 3)),
              MaxPooling2D(2, 2),
-             Conv2D(28, (3, 3), activation='relu', input_shape=(28, 28, 3)),
+             Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 3)),
              MaxPooling2D(2, 2),
-             Conv2D(28, (3, 3), activation='relu', input_shape=(28, 28, 3)),
+             Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 3)),
              MaxPooling2D(2, 2),
              Flatten(),
              Dense(units=512, activation='relu'),
