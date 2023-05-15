@@ -70,13 +70,22 @@ class Network:
             json_file.write(model_json)
         self.cnn.save_weights("cnn.h5")
 
-    def testCatalog(self, catalog, labelFileName):
+    def testCatalog(self, catalog, labelFileName=None, label=None, doPrint=False):
         i = 0
         correctCount = 0
         incorrectCount = 0
+        isLabelFile = None
 
         files = sorted(os.listdir(catalog), key=len)
-        labelArray = dsc.txt_labelFile_to_array(labelFileName, len(files))
+
+        if labelFileName != None:
+            labelArray = dsc.txt_labelFile_to_array(labelFileName, len(files))
+            isLabelFile = True
+        elif label != None:
+            isLabelFile = False
+        else:
+            return
+
 
         for file in files:
             img = load_img(os.path.join(catalog, file), target_size=(28, 28))
@@ -87,8 +96,13 @@ class Network:
             predictedLetter = self.cnn.predict(img)
             # print(predictedLetter)
             predictedLetter = main.find_letter(predictedLetter)
-            actualLetter = chr(labelArray[i] + 97)
-            # print("Predicted: " + predictedLetter + " Actual: " + actualLetter)
+            if isLabelFile:
+                actualLetter = chr(labelArray[i] + 97)
+            else:
+                actualLetter = label
+
+            if doPrint:
+                print("Predicted: " + predictedLetter + " Actual: " + actualLetter)
 
             if predictedLetter == actualLetter:
                 correctCount += 1
