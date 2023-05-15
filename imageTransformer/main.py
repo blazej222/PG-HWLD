@@ -53,6 +53,7 @@ def transformAll(location):
 def main():
     folderName = ".\\dataset"
     transformAll(folderName)
+    transformAll("..\\uploaded-images")
 
 
 if __name__ == '__main__':

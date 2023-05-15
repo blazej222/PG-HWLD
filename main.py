@@ -61,6 +61,7 @@ def find_letter_2(letter):
     for i in range(0, 25):
         if letter[0][i] == 1:
             return chr(i + 97)
+    return '0'
 
 
 if __name__ == '__main__':
@@ -68,4 +69,5 @@ if __name__ == '__main__':
     network.create_cnn()
     network.training_testing_set()
     network.train()
-    network.test()
+    # network.testCatalog(".\\test-images", ".\\test-labels.txt)
+    network.test(".\\imageTransformer/dataset/testImage.bmp")

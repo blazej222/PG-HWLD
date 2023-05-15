@@ -35,7 +35,7 @@ class Network:
         self.cnn = cnn
 
     def training_testing_set(self):
-        trainDataGen = ImageDataGenerator(rescale=1. / 255, shear_range=0.2, zoom_range=0.2, horizontal_flip=True)
+        trainDataGen = ImageDataGenerator(rescale=1. / 255)
         self.trainSet = trainDataGen.flow_from_directory(
             directory='train-images',
             target_size=(28, 28),
@@ -50,7 +50,7 @@ class Network:
 
 
     def train(self):
-        #if json exist
+        #if json exists
         if os.path.exists("cnn.json") and os.path.exists("cnn.h5"):
             with open("cnn.json", "r") as json_file:
                 loaded_model_json = json_file.read()
@@ -61,7 +61,7 @@ class Network:
 
         #json does not exist
         self.cnn.fit(self.trainSet,
-                steps_per_epoch=1950,
+                # steps_per_epoch=1950,
                 epochs=3,
                 validation_data=self.testSet)
 
@@ -70,28 +70,40 @@ class Network:
             json_file.write(model_json)
         self.cnn.save_weights("cnn.h5")
 
-    def test(self):
+    def testCatalog(self, catalog, labelFileName):
         i = 0
         correctCount = 0
         incorrectCount = 0
 
-        for address, dirs, files in os.walk(".\\test-images"):
-            labelArray = dsc.txt_labelFile_to_array(".\\test-labels.txt", len(files))
+        files = sorted(os.listdir(catalog), key=len)
+        labelArray = dsc.txt_labelFile_to_array(labelFileName, len(files))
 
-            for file in files:
-                img = load_img(os.path.join(address, file), target_size=(28, 28))
-                img = img_to_array(img)
-                img = np.expand_dims(img, axis=0)
-                img = np.vstack([img])
-                predictedLetter = self.cnn.predict(img)
-                predictedLetter = main.find_letter_2(predictedLetter)
-                #print("Letter: " + predictedLetter)
+        for file in files:
+            img = load_img(os.path.join(catalog, file), target_size=(28, 28))
+            # img.show()
+            img = img_to_array(img)
+            img = np.expand_dims(img, axis=0)
+            img = np.vstack([img])
+            predictedLetter = self.cnn.predict(img)
+            # print(predictedLetter)
+            predictedLetter = main.find_letter_2(predictedLetter)
+            actualLetter = chr(labelArray[i] + 97)
+            # print("Predicted: " + predictedLetter + " Actual: " + actualLetter)
 
-                if predictedLetter == chr(labelArray[i] + 97):
-                    correctCount += 1
-                else:
-                    incorrectCount += 1
+            if predictedLetter == actualLetter:
+                correctCount += 1
+            else:
+                incorrectCount += 1
 
-                i += 1
+            i += 1
 
         print("Accuracy: " + str(correctCount / (correctCount + incorrectCount)))
+
+    def test(self, fileName):
+        img = load_img(fileName)
+        img = img_to_array(img)
+        img = np.expand_dims(img, axis=0)
+        img = np.vstack([img])
+        predictedLetter = self.cnn.predict(img)
+        predictedLetter = main.find_letter_2(predictedLetter)
+        print("Predicted letter: " + predictedLetter)
