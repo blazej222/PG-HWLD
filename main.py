@@ -1,5 +1,5 @@
 from neural_network import *
-import os
+
 
 def find_letter(letter):
     if letter[0][0] == 1:
@@ -55,6 +55,12 @@ def find_letter(letter):
     elif letter[0][25] == 1:
         return 'z'
 
+
+# XD
+def find_letter_2(letter):
+    for i in range(0, 25):
+        if letter[0][i] == 1:
+            return chr(i + 97)
 
 
 if __name__ == '__main__':
