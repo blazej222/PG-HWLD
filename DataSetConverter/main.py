@@ -115,10 +115,10 @@ def txt_labelFile_to_array(txtFileName, numImages):
 
 
 def main():
-    # filename = ".\\emnist-letters-train-images-idx3-ubyte"
-    # labelFile = ".\\emnist-letters-train-labels-idx1-ubyte"
-    # location = "..\\train-images"
-    # array_to_images_sorted(filename, location, labelFile)
+    filename = ".\\emnist-letters-train-images-idx3-ubyte"
+    labelFile = ".\\emnist-letters-train-labels-idx1-ubyte"
+    location = "..\\train-images"
+    array_to_images_sorted(filename, location, labelFile)
 
     filename = ".\\emnist-letters-test-images-idx3-ubyte"
     labelFile = ".\\emnist-letters-test-labels-idx1-ubyte"
