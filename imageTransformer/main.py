@@ -54,4 +54,6 @@ def main():
     folderName = ".\\dataset"
     transformAll(folderName)
 
-main()
+
+if __name__ == '__main__':
+    main()

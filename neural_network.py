@@ -2,6 +2,7 @@ import os
 
 import keras
 import numpy as np
+import DataSetConverter.main as dsc
 from keras import Sequential
 from keras.layers import Dense, Flatten, MaxPooling2D, Conv2D
 from keras.preprocessing.image import ImageDataGenerator
@@ -70,11 +71,27 @@ class Network:
         self.cnn.save_weights("cnn.h5")
 
     def test(self):
-        file = r'test-images/train_0.bmp'
-        img = load_img(file, target_size=(28, 28))
-        img = img_to_array(img)
-        img = np.expand_dims(img, axis=0)
-        img = np.vstack([img])
-        letter = self.cnn.predict(img)
-        letter = main.find_letter(letter)
-        print("Letter: " + letter)
+        i = 0
+        correctCount = 0
+        incorrectCount = 0
+
+        for address, dirs, files in os.walk(".\\test-images"):
+            labelArray = dsc.txt_labelFile_to_array(".\\test-labels.txt", len(files))
+
+            for file in files:
+                img = load_img(os.path.join(address, file), target_size=(28, 28))
+                img = img_to_array(img)
+                img = np.expand_dims(img, axis=0)
+                img = np.vstack([img])
+                predictedLetter = self.cnn.predict(img)
+                predictedLetter = main.find_letter_2(predictedLetter)
+                #print("Letter: " + predictedLetter)
+
+                if predictedLetter == chr(labelArray[i] + 97):
+                    correctCount += 1
+                else:
+                    incorrectCount += 1
+
+                i += 1
+
+        print("Accuracy: " + str(correctCount / (correctCount + incorrectCount)))
