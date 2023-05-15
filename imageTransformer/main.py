@@ -12,6 +12,7 @@ def image_transform(filename, removeOriginals):
     # imageFile = cv2.fastNlMeansDenoising(imageFile, imageFile, 60.0, 7, 21)
     imageFile = flat_denoise(imageFile, 190)
     imageFile = cv2.resize(imageFile, dsize=(28, 28), interpolation=cv2.INTER_NEAREST)
+    # imageFile = flat_denoise(imageFile, 190)
 
     cv2.imwrite("%s.bmp" % os.path.splitext(filename)[0], imageFile)
     if removeOriginals:

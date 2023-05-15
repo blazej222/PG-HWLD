@@ -8,6 +8,7 @@ from keras.layers import Dense, Flatten, MaxPooling2D, Conv2D
 from keras.preprocessing.image import ImageDataGenerator
 from keras.saving.legacy.model_config import model_from_json
 from keras.utils import load_img, img_to_array
+import matplotlib.pyplot as plt
 import main
 
 
@@ -21,9 +22,9 @@ class Network:
         cnn = Sequential(
             [Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 3)),
              MaxPooling2D(2, 2),
-             Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 3)),
+             Conv2D(64, (3, 3), activation='relu', input_shape=(28, 28, 3)),
              MaxPooling2D(2, 2),
-             Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 3)),
+             Conv2D(128, (3, 3), activation='relu', input_shape=(28, 28, 3)),
              MaxPooling2D(2, 2),
              Flatten(),
              Dense(units=512, activation='relu'),
@@ -48,9 +49,8 @@ class Network:
             target_size=(28, 28),
             batch_size=64)
 
-
     def train(self):
-        #if json exists
+        # if json exists
         if os.path.exists("cnn.json") and os.path.exists("cnn.h5"):
             with open("cnn.json", "r") as json_file:
                 loaded_model_json = json_file.read()
@@ -59,18 +59,18 @@ class Network:
             self.cnn.load_weights("cnn.h5")
             return
 
-        #json does not exist
+        # json does not exist
         self.cnn.fit(self.trainSet,
-                # steps_per_epoch=1950,
-                epochs=3,
-                validation_data=self.testSet)
+                     # steps_per_epoch=1950,
+                     epochs=3,
+                     validation_data=self.testSet)
 
         model_json = self.cnn.to_json()
         with open("cnn.json", "w") as json_file:
             json_file.write(model_json)
         self.cnn.save_weights("cnn.h5")
 
-    def testCatalog(self, catalog, labelFileName=None, label=None, doPrint=False):
+    def test_catalog(self, catalog, labelFileName=None, label=None, doPrint=False):
         i = 0
         correctCount = 0
         incorrectCount = 0
@@ -78,23 +78,21 @@ class Network:
 
         files = sorted(os.listdir(catalog), key=len)
 
-        if labelFileName != None:
+        if labelFileName is not None:
             labelArray = dsc.txt_labelFile_to_array(labelFileName, len(files))
             isLabelFile = True
-        elif label != None:
+        elif label is not None:
             isLabelFile = False
         else:
+            print("Invalid arguments to test_catalog")
             return
-
 
         for file in files:
             img = load_img(os.path.join(catalog, file), target_size=(28, 28))
-            # img.show()
-            img = img_to_array(img)
-            img = np.expand_dims(img, axis=0)
-            img = np.vstack([img])
-            predictedLetter = self.cnn.predict(img)
-            # print(predictedLetter)
+            imgArray = img_to_array(img)
+            imgArray = np.expand_dims(imgArray, axis=0)
+            imgArray = np.vstack([imgArray])
+            predictedLetter = self.cnn.predict(imgArray)
             predictedLetter = main.find_letter(predictedLetter)
             if isLabelFile:
                 actualLetter = chr(labelArray[i] + 97)
@@ -107,6 +105,7 @@ class Network:
             if predictedLetter == actualLetter:
                 correctCount += 1
             else:
+                # img.show()
                 incorrectCount += 1
 
             i += 1
