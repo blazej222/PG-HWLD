@@ -70,4 +70,5 @@ if __name__ == '__main__':
     network.training_testing_set()
     network.train()
     # network.testCatalog(".\\test-images", ".\\test-labels.txt)
-    network.test(".\\imageTransformer/dataset/testImage.bmp")
+    network.test(".\\uploaded-images/testImage.bmp")
+    network.test(".\\uploaded-images/testImage2.bmp")
