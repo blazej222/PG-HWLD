@@ -86,7 +86,7 @@ class Network:
             img = np.vstack([img])
             predictedLetter = self.cnn.predict(img)
             # print(predictedLetter)
-            predictedLetter = main.find_letter_2(predictedLetter)
+            predictedLetter = main.find_letter(predictedLetter)
             actualLetter = chr(labelArray[i] + 97)
             # print("Predicted: " + predictedLetter + " Actual: " + actualLetter)
 
@@ -105,5 +105,5 @@ class Network:
         img = np.expand_dims(img, axis=0)
         img = np.vstack([img])
         predictedLetter = self.cnn.predict(img)
-        predictedLetter = main.find_letter_2(predictedLetter)
+        predictedLetter = main.find_letter(predictedLetter)
         print("Predicted letter: " + predictedLetter)
