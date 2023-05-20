@@ -20,11 +20,11 @@ class Network:
 
     def create_cnn(self):
         cnn = Sequential(
-            [Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 3)),
+            [Conv2D(32, (3, 3), activation=keras.layers.LeakyReLU(alpha=0.1), input_shape=(28, 28, 3)),
              MaxPooling2D(2, 2),
-             Conv2D(64, (3, 3), activation='relu', input_shape=(28, 28, 3)),
+             Conv2D(64, (3, 3), activation=keras.layers.LeakyReLU(alpha=0.1), input_shape=(28, 28, 3)),
              MaxPooling2D(2, 2),
-             Conv2D(128, (3, 3), activation='relu', input_shape=(28, 28, 3)),
+             Conv2D(128, (3, 3), activation=keras.layers.LeakyReLU(alpha=0.1), input_shape=(28, 28, 3)),
              MaxPooling2D(2, 2),
              Flatten(),
              Dense(units=512, activation='relu'),
@@ -87,12 +87,14 @@ class Network:
             print("Invalid arguments to test_catalog")
             return
 
+        print("Starting catalog tests")
+
         for file in files:
             img = load_img(os.path.join(catalog, file), target_size=(28, 28))
             imgArray = img_to_array(img)
             imgArray = np.expand_dims(imgArray, axis=0)
             imgArray = np.vstack([imgArray])
-            predictedLetter = self.cnn.predict(imgArray)
+            predictedLetter = self.cnn.predict(imgArray, verbose=0)
             predictedLetter = main.find_letter(predictedLetter)
             if isLabelFile:
                 actualLetter = chr(labelArray[i] + 97)
@@ -117,6 +119,6 @@ class Network:
         img = img_to_array(img)
         img = np.expand_dims(img, axis=0)
         img = np.vstack([img])
-        predictedLetter = self.cnn.predict(img)
+        predictedLetter = self.cnn.predict(img, verbose=0)
         predictedLetter = main.find_letter(predictedLetter)
         print("Predicted letter: " + predictedLetter)
