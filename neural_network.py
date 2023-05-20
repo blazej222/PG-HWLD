@@ -27,7 +27,7 @@ class Network:
              Conv2D(128, (3, 3), activation=keras.layers.LeakyReLU(alpha=0.1), input_shape=(28, 28, 3)),
              MaxPooling2D(2, 2),
              Flatten(),
-             Dense(units=512, activation='relu'),
+             Dense(units=512, activation=keras.layers.LeakyReLU(alpha=0.1)),
              Dense(units=26, activation='softmax')])
         cnn.compile(optimizer=keras.optimizers.RMSprop(learning_rate=0.001),
                     loss='categorical_crossentropy',
