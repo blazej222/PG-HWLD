@@ -3,14 +3,15 @@ import cv2
 import os
 
 
-def image_transform(filename, removeOriginals):
+def image_transform(filename, removeOriginals=True, denoise=True):
     imageFile = cv2.imread(filename)
     imageFile = cv2.cvtColor(imageFile, cv2.COLOR_BGR2GRAY)
     imageFile = cv2.normalize(imageFile, imageFile, 0, 255, cv2.NORM_MINMAX)
-    # imageFile = remove_shadows(imageFile)
-    # imageFile = cv2.convertScaleAbs(imageFile, 2, 1);
-    # imageFile = cv2.fastNlMeansDenoising(imageFile, imageFile, 60.0, 7, 21)
-    imageFile = flat_denoise(imageFile, 190)
+    if denoise:
+        # imageFile = remove_shadows(imageFile)
+        # imageFile = cv2.convertScaleAbs(imageFile, 2, 1);
+        # imageFile = cv2.fastNlMeansDenoising(imageFile, imageFile, 60.0, 7, 21)
+        imageFile = flat_denoise(imageFile, 190)
     imageFile = cv2.resize(imageFile, dsize=(28, 28), interpolation=cv2.INTER_NEAREST)
     # imageFile = flat_denoise(imageFile, 190)
 
@@ -42,20 +43,20 @@ def sig(x, parameter):
     return 1 / (1 + np.exp((-parameter) * (x - 127)))
 
 
-def transformAll(location, removeOriginals=True):
+def transformAll(location, removeOriginals=True, denoise=True):
     for address, dirs, files in os.walk(location):
         for file in files:
             if file.endswith(".png") or file.endswith(".jpg"):
-                image_transform(os.path.join(address, file), removeOriginals)
+                image_transform(os.path.join(address, file), removeOriginals, denoise)
 
         for directory in dirs:
             transformAll(os.path.join(address, directory))
 
 
 def main():
-    folderName = ".\\dataset"
+    folderName = "..\\dataset-black-marker"
     transformAll(folderName)
-    transformAll("..\\uploaded-images", removeOriginals=False)
+    # transformAll("..\\uploaded-images", removeOriginals=False)
 
 
 if __name__ == '__main__':

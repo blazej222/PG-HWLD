@@ -1,15 +1,25 @@
+import ntpath
 import os
 
 import keras
 import numpy as np
-import DataSetConverter.main as dsc
 from keras import Sequential
 from keras.layers import Dense, Flatten, MaxPooling2D, Conv2D
 from keras.preprocessing.image import ImageDataGenerator
 from keras.saving.legacy.model_config import model_from_json
 from keras.utils import load_img, img_to_array
-import matplotlib.pyplot as plt
-import main
+
+import DataSetConverter.main as dsc
+
+
+def find_letter(letter):
+    max_prob = 0
+    index = -1
+    for i in range(0, 26):
+        if letter[0][i] > max_prob:
+            max_prob = letter[0][i]
+            index = i
+    return chr(index + 97)
 
 
 class Network:
@@ -20,14 +30,14 @@ class Network:
 
     def create_cnn(self):
         cnn = Sequential(
-            [Conv2D(32, (3, 3), activation=keras.layers.LeakyReLU(alpha=0.1), input_shape=(28, 28, 3)),
+            [Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 3)),
              MaxPooling2D(2, 2),
-             Conv2D(64, (3, 3), activation=keras.layers.LeakyReLU(alpha=0.1), input_shape=(28, 28, 3)),
+             Conv2D(64, (3, 3), activation='relu', input_shape=(28, 28, 3)),
              MaxPooling2D(2, 2),
-             Conv2D(128, (3, 3), activation=keras.layers.LeakyReLU(alpha=0.1), input_shape=(28, 28, 3)),
+             Conv2D(128, (3, 3), activation='relu', input_shape=(28, 28, 3)),
              MaxPooling2D(2, 2),
              Flatten(),
-             Dense(units=512, activation=keras.layers.LeakyReLU(alpha=0.1)),
+             Dense(units=512, activation='relu'),
              Dense(units=26, activation='softmax')])
         cnn.compile(optimizer=keras.optimizers.RMSprop(learning_rate=0.001),
                     loss='categorical_crossentropy',
@@ -35,17 +45,17 @@ class Network:
         cnn.summary()
         self.cnn = cnn
 
-    def training_testing_set(self):
+    def training_testing_set(self, train_catalog, test_catalog):
         trainDataGen = ImageDataGenerator(rescale=1. / 255)
         self.trainSet = trainDataGen.flow_from_directory(
-            directory='train-images',
+            directory=train_catalog,
             target_size=(28, 28),
             batch_size=64,
             class_mode='categorical')
 
         testDataGen = ImageDataGenerator(rescale=1. / 255)
         self.testSet = testDataGen.flow_from_directory(
-            directory='test-images',
+            directory=test_catalog,
             target_size=(28, 28),
             batch_size=64)
 
@@ -70,7 +80,7 @@ class Network:
             json_file.write(model_json)
         self.cnn.save_weights("cnn.h5")
 
-    def test_catalog(self, catalog, labelFileName=None, label=None, doPrint=False):
+    def test_catalog(self, catalog, labelFileName=None, label=None, doPrint=False, test_by_folder=False):
         i = 0
         correctCount = 0
         incorrectCount = 0
@@ -81,7 +91,7 @@ class Network:
         if labelFileName is not None:
             labelArray = dsc.txt_labelFile_to_array(labelFileName, len(files))
             isLabelFile = True
-        elif label is not None:
+        elif label is not None or test_by_folder is True:
             isLabelFile = False
         else:
             print("Invalid arguments to test_catalog")
@@ -95,9 +105,11 @@ class Network:
             imgArray = np.expand_dims(imgArray, axis=0)
             imgArray = np.vstack([imgArray])
             predictedLetter = self.cnn.predict(imgArray, verbose=0)
-            predictedLetter = main.find_letter(predictedLetter)
+            predictedLetter = find_letter(predictedLetter)
             if isLabelFile:
                 actualLetter = chr(labelArray[i] + 97)
+            elif test_by_folder:
+                actualLetter = ntpath.basename(catalog)[0]
             else:
                 actualLetter = label
 
@@ -120,5 +132,5 @@ class Network:
         img = np.expand_dims(img, axis=0)
         img = np.vstack([img])
         predictedLetter = self.cnn.predict(img, verbose=0)
-        predictedLetter = main.find_letter(predictedLetter)
+        predictedLetter = find_letter(predictedLetter)
         print("Predicted letter: " + predictedLetter)
