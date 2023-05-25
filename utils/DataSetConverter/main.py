@@ -115,6 +115,7 @@ def txt_labelFile_to_array(txtFileName, numImages):
 
 
 def main():
+    # FIXME: Change paths
     filename = ".\\emnist-letters-train-images-idx3-ubyte"
     labelFile = ".\\emnist-letters-train-labels-idx1-ubyte"
     location = "..\\train-images"

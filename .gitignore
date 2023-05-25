@@ -1,11 +1,2 @@
-DataSetConverter/test-images
-DataSetConverter/train-images
-DataSetConverter/emnist-letters-test-images-idx3-ubyte
-DataSetConverter/emnist-letters-test-labels-idx1-ubyte
-DataSetConverter/emnist-letters-train-images-idx3-ubyte
-DataSetConverter/emnist-letters-train-labels-idx1-ubyte
-DataSetConverter/test-labels.txt
-test-images
-train-images
-dataset-black-marker
-letters-marker-cropped
+__pycache__/
+#TODO: Remove indexed copies of bigfiles from this repo to make it a lot lighter

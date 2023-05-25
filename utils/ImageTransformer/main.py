@@ -54,6 +54,7 @@ def transformAll(location, removeOriginals=True, denoise=True):
 
 
 def main():
+    #  FIXME Fix paths
     folderName = "..\\dataset-black-marker"
     transformAll(folderName)
     # transformAll("..\\uploaded-images", removeOriginals=False)

@@ -81,6 +81,7 @@ def crop_black_letters_catalog(catalog, margin, threshold):
 
 
 def main():
+    #FIXME: Change paths
     crop_black_letters_catalog("..\\dataset-black-marker", margin=5, threshold=100)
     print("Cropped images saved successfully.")
 
