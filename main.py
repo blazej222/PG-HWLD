@@ -9,4 +9,4 @@ if __name__ == '__main__':
     # network.test_catalog(".\\imageTransformer/dataset/Training/e", label='e', doPrint=True)
     # network.test(".\\uploaded-images/testImage.bmp")
     # network.test(".\\uploaded-images/testImage2.bmp")
-    # network.test_catalog(".\\dataset-black-marker/g", test_by_folder=True, doPrint=True)
+    # network.test_catalog(".\\dataset-black-marker/x", test_by_folder=True, doPrint=True)

@@ -19,6 +19,8 @@ def find_letter(letter):
         if letter[0][i] > max_prob:
             max_prob = letter[0][i]
             index = i
+    if index == -1:
+        print("find_letter() error")
     return chr(index + 97)
 
 
