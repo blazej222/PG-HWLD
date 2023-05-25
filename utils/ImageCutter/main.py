@@ -45,7 +45,10 @@ def cut_image_catalog(location, destination, crop_width, crop_height, left_margi
 
 def main():
     # FIXME: Correct paths
-    cut_image_catalog("..\\letters-marker-cropped", "..\\dataset-black-marker", crop_width=196, crop_height=196,
+    source_image_arrays_path = "../../resources/datasets/archives/scans-multi-person"
+    destination_images_path = "../../resources/datasets/unpacked/dataset-multi-person"
+
+    cut_image_catalog(source_image_arrays_path, destination_images_path, crop_width=196, crop_height=196,
                       left_margin=36, upper_margin=48, divisor=5, num_tiles_x=12, num_tiles_y=17)
 
 
