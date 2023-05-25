@@ -4,10 +4,9 @@ from neural_network import *
 # test_images_path = ".\\test-images"
 # test_labels_path = ".\\test-labels.txt"
 
-# FIXME:Change paths to correct ones
-train_images_path = "../../resources/datasets/unpacked/dataset_ImageTransformer/Training"
-test_images_path = "../../resources/datasets/unpacked/dataset_ImageTransformer/Testing/a"
-test_labels_path = "../../resources/datasets/unpacked/dataset_ImageTransformer/test-labels.txt"
+train_images_path = "../../resources/datasets/unpacked/dataset-EMNIST/train-images"
+test_images_path = "../../resources/datasets/unpacked/dataset-EMNIST/test-images"
+test_labels_path = "../../resources/datasets/unpacked/dataset-EMNIST/test-labels.txt"
 
 if __name__ == '__main__':
     network = Network(None, None, None)

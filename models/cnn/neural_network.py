@@ -103,7 +103,6 @@ class Network:
         print("Starting catalog tests")
 
         for file in files:
-            # FIXME: Looks like something's wrong here
             tmpath = os.path.join(catalog, file)
             tmpath = os.path.normpath(tmpath)
             img = load_img(tmpath, target_size=(28, 28))
