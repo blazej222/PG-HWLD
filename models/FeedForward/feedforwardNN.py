@@ -21,7 +21,7 @@ class FNN:
         self.weights3 = None
         self.bias3 = None
         self.error = None
-        self.epochs = 1500
+        self.epochs = 2352
         self.hidden1_output = None
         self.hidden2_output = None
         self.predicted_output = None
@@ -34,8 +34,8 @@ class FNN:
 
     def initialize_parameters(self):
         input_size = self.trainSet.shape[1]
-        hidden1_size = 128
-        hidden2_size = 64
+        hidden1_size = 130
+        hidden2_size = 65
         output_size = 26
 
         self.weights1 = np.random.randn(input_size, hidden1_size)
@@ -69,6 +69,7 @@ class FNN:
         for epoch in range(self.epochs):
             self.forward()
             self.backward()
+            print("{} done.".format(epoch))
 
     def predict(self):
         accuracy = 0
