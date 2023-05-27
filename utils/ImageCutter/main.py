@@ -11,7 +11,7 @@ from PIL import Image
 
 
 def cut_image(image_path, destination, crop_width, crop_height, left_margin, upper_margin, divisor, num_tiles_x,
-              num_tiles_y):
+              num_tiles_y, num_files):
     image = Image.open(image_path)
     subdirectory = destination + f"/{ntpath.basename(image_path)[0]}"
     if not os.path.exists(subdirectory):
@@ -24,32 +24,44 @@ def cut_image(image_path, destination, crop_width, crop_height, left_margin, upp
             right = left + crop_width
             lower = upper + crop_height
 
+            # Break conditions
+            if y * num_tiles_x + x == num_files or lower > image.height:
+                print(f"Image division for {ntpath.basename(image_path)[0]} completed successfully.")
+                return
+
             # Crop the image
             cropped_image = image.crop((left, upper, right, lower))
 
             # Save the cropped image
-            cropped_image.save(subdirectory + f"/{ntpath.basename(image_path)[0]}_{y * num_tiles_x + x + 1}.png")
+            cropped_image.save(subdirectory + f"/{ntpath.basename(image_path)[0]}_{y * num_tiles_x + x + 1}_{hash(image_path)}.png")
 
     print(f"Image division for {ntpath.basename(image_path)[0]} completed successfully.")
 
 
 def cut_image_catalog(location, destination, crop_width, crop_height, left_margin, upper_margin, divisor, num_tiles_x,
-                      num_tiles_y):
+                      num_tiles_y, num_files=-1):
     if not os.path.exists(destination):
         os.makedirs(destination)
     for address, dirs, files in os.walk(location):
         for file in files:
             cut_image(os.path.join(location, file), destination, crop_width, crop_height, left_margin, upper_margin,
-                      divisor, num_tiles_x, num_tiles_y)
+                      divisor, num_tiles_x, num_tiles_y, num_files)
 
 
 def main():
-    # FIXME: Correct paths
-    source_image_arrays_path = "../../resources/datasets/archives/scans-multi-person"
-    destination_images_path = "../../resources/datasets/unpacked/dataset-multi-person"
+    source_image_arrays_path_mp1 = "../../resources/datasets/archives/scans-multi-person-1"
+    source_image_arrays_path_mp2 = "../../resources/datasets/archives/scans-multi-person-2"
+    source_image_arrays_path_sp = "../../resources/datasets/archives/scans-single-person"
+    destination_images_path_mp = "../../resources/datasets/unpacked/dataset-multi-person"
+    destination_images_path_sp = "../../resources/datasets/unpacked/dataset-single-person"
 
-    cut_image_catalog(source_image_arrays_path, destination_images_path, crop_width=196, crop_height=196,
+    cut_image_catalog(source_image_arrays_path_mp1, destination_images_path_mp, crop_width=196, crop_height=196,
+                      left_margin=36, upper_margin=48, divisor=5, num_tiles_x=12, num_tiles_y=17, num_files=124)
+
+    cut_image_catalog(source_image_arrays_path_mp2, destination_images_path_mp, crop_width=196, crop_height=196,
                       left_margin=36, upper_margin=48, divisor=5, num_tiles_x=12, num_tiles_y=17)
+
+    # cut_image_catalog(source_image_arrays_path_sp, destination_images_path_sp, crop_width=196, crop_height=196, left_margin=36, upper_margin=48, divisor=5, num_tiles_x=12, num_tiles_y=17)
 
 
 if __name__ == '__main__':
