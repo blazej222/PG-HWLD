@@ -20,10 +20,14 @@ class FNN:
         self.weights2 = None
         self.weights3 = None
         self.bias3 = None
+        self.bias4 = None
+        self.weights4 = None
         self.error = None
-        self.epochs = 2352
+        self.epochs = 2752
         self.hidden1_output = None
         self.hidden2_output = None
+        self.hidden3_output = None
+        self.hidden4_output = None
         self.predicted_output = None
         self.trainLabels = []
         self.testLabels = []
@@ -34,29 +38,36 @@ class FNN:
 
     def initialize_parameters(self):
         input_size = self.trainSet.shape[1]
-        hidden1_size = 130
-        hidden2_size = 65
+        hidden1_size = 250
+        hidden2_size = 100
+        hidden3_size = 60
         output_size = 26
 
         self.weights1 = np.random.randn(input_size, hidden1_size)
         self.bias1 = np.zeros(hidden1_size)
         self.weights2 = np.random.randn(hidden1_size, hidden2_size)
         self.bias2 = np.zeros(hidden2_size)
-        self.weights3 = np.random.randn(hidden2_size, output_size)
-        self.bias3 = np.zeros(output_size)
+        self.weights3 = np.random.randn(hidden2_size, hidden3_size)
+        self.bias3 = np.zeros(hidden3_size)
+        self.weights4 = np.random.randn(hidden3_size, output_size)
+        self.bias4 = np.zeros(output_size)
 
     def forward(self):
         self.hidden1_output = sigmoid(np.dot(self.current_set, self.weights1) + self.bias1)
         self.hidden2_output = sigmoid(np.dot(self.hidden1_output, self.weights2) + self.bias2)
-        self.predicted_output = sigmoid(np.dot(self.hidden2_output, self.weights3) + self.bias3)
+        self.hidden3_output = sigmoid(np.dot(self.hidden2_output, self.weights3) + self.bias3)
+        self.predicted_output = sigmoid(np.dot(self.hidden3_output, self.weights4) + self.bias4)
 
     def backward(self):
-        error = self.trainLabels - self.predicted_output
+        output_error = self.trainLabels - self.predicted_output
+        self.weights4 += self.learning_rate * np.dot(self.hidden3_output.T, output_error)
+        self.bias4 += self.learning_rate * np.sum(output_error, axis=0)
 
-        self.weights3 += self.learning_rate * np.dot(self.hidden2_output.T, error)
-        self.bias3 += self.learning_rate * np.sum(error, axis=0)
+        hidden3_error = np.dot(output_error, self.weights4.T)
+        self.weights3 += self.learning_rate * np.dot(self.hidden2_output.T, hidden3_error)
+        self.bias3 += self.learning_rate * np.sum(hidden3_error, axis=0)
 
-        hidden2_error = np.dot(error, self.weights3.T)
+        hidden2_error = np.dot(hidden3_error, self.weights3.T)
         self.weights2 += self.learning_rate * np.dot(self.hidden1_output.T, hidden2_error)
         self.bias2 += self.learning_rate * np.sum(hidden2_error, axis=0)
 
@@ -69,7 +80,7 @@ class FNN:
         for epoch in range(self.epochs):
             self.forward()
             self.backward()
-            print("{} done.".format(epoch))
+            print(epoch)
 
     def predict(self):
         accuracy = 0
@@ -79,7 +90,7 @@ class FNN:
         for i in range(len(predicted_labels)):
             if predicted_labels[i] == self.testLabels[i]:
                 accuracy += 1
-        print("Accuracy: ", accuracy/len(predicted_labels))
+        print("Accuracy: ", accuracy / len(predicted_labels))
 
     def load_sets(self, directory, is_train_set):
         imagesArr = []
@@ -111,4 +122,3 @@ class FNN:
         for i, label in enumerate(self.trainLabels):
             encoded_labels[i, label] = 1
         self.trainLabels = encoded_labels
-
