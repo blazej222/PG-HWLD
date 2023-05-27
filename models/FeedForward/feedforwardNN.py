@@ -2,8 +2,9 @@ import os
 from tkinter import Image
 from PIL import Image
 import numpy as np
+from numba import jit
 
-
+@jit(parallel=True)
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
 
@@ -23,7 +24,7 @@ class FNN:
         self.bias4 = None
         self.weights4 = None
         self.error = None
-        self.epochs = 2752
+        self.epochs = 10000
         self.hidden1_output = None
         self.hidden2_output = None
         self.hidden3_output = None
@@ -52,12 +53,14 @@ class FNN:
         self.weights4 = np.random.randn(hidden3_size, output_size)
         self.bias4 = np.zeros(output_size)
 
+    @jit(parallel=True)
     def forward(self):
         self.hidden1_output = sigmoid(np.dot(self.current_set, self.weights1) + self.bias1)
         self.hidden2_output = sigmoid(np.dot(self.hidden1_output, self.weights2) + self.bias2)
         self.hidden3_output = sigmoid(np.dot(self.hidden2_output, self.weights3) + self.bias3)
         self.predicted_output = sigmoid(np.dot(self.hidden3_output, self.weights4) + self.bias4)
 
+    @jit(parallel=True)
     def backward(self):
         output_error = self.trainLabels - self.predicted_output
         self.weights4 += self.learning_rate * np.dot(self.hidden3_output.T, output_error)
