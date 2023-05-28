@@ -117,14 +117,14 @@ def txt_labelFile_to_array(txtFileName, numImages):
 def main():
     filename = "../../resources/datasets/archives/EMNIST-binary/emnist-letters-train-images-idx3-ubyte"
     labelFile = "../../resources/datasets/archives/EMNIST-binary/emnist-letters-train-labels-idx1-ubyte"
-    location = "../../resources/datasets/unpacked/dataset-EMNIST/train-images"
+    location = "../../resources/datasets/dataset-EMNIST/train-images"
     array_to_images_sorted(filename, location, labelFile)
 
     filename = "../../resources/datasets/archives/EMNIST-binary/emnist-letters-test-images-idx3-ubyte"
     labelFile = "../../resources/datasets/archives/EMNIST-binary/emnist-letters-test-labels-idx1-ubyte"
-    location = "../../resources/datasets/unpacked/dataset-EMNIST/test-images"
+    location = "../../resources/datasets/dataset-EMNIST/test-images"
     numImages = array_to_images(filename, location)
-    labelFile_to_txt(labelFile, "../../resources/datasets/unpacked/dataset-EMNIST/test-labels.txt", numImages)
+    labelFile_to_txt(labelFile, "../../resources/datasets/dataset-EMNIST/test-labels.txt", numImages)
 
 
 if __name__ == '__main__':
