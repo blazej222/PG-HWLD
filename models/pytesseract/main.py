@@ -30,8 +30,7 @@ def recognize(file,dir):
     elif len(letter) > 1:
         if letter[0] == dir or letter[0] == dir.upper(): current_ok_recognized += 1
     else:
-        pass
-    # print("Image {}/{} recognized as {}".format(dir,file,letter))
+        print(f"Letter {dir} from file {file} wrongly recognized as {letter}")
     return [current_flawlessly_recongized,current_ok_recognized]
 
 if __name__ == '__main__':
