@@ -38,8 +38,9 @@ def flat_denoise(image, threshold):
 def sig(x, parameter):
     return 1 / (1 + np.exp((-parameter) * (x - 127)))
 
+# TODO (Blazej): Check if faster MP approach exists
 def transformSingle(file,address,denoise,destination,location,removeOriginals):
-    if file.endswith(".png") or file.endswith(".jpg"):
+    if file.endswith(".png") or file.endswith(".jpg") or file.endswith(".bmp"):
         image = cv2.imread(os.path.join(address, file))
         transformed_image = image_transform(image, denoise)
         transformed_image_name = f"{os.path.join(destination + address.replace(location, ''), os.path.splitext(file)[0])}.bmp"
