@@ -2,8 +2,9 @@ import os
 from tkinter import Image
 from PIL import Image
 import numpy as np
+from numba import jit
 
-
+@jit(parallel=True)
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
 
@@ -13,6 +14,7 @@ def sigmoid_derivative(x):
 
 
 class FNN:
+    # FIXME: Adjust parameters
     def __init__(self):
         self.bias1 = None
         self.weights1 = None
@@ -22,12 +24,17 @@ class FNN:
         self.bias3 = None
         self.bias4 = None
         self.weights4 = None
+        self.weights5 = None
+        self.bias5 = None
+        self.bias6 = None
+        self.weights6 = None
         self.error = None
-        self.epochs = 2752
+        self.epochs = 2352
         self.hidden1_output = None
         self.hidden2_output = None
         self.hidden3_output = None
         self.hidden4_output = None
+        self.hidden5_output = None
         self.predicted_output = None
         self.trainLabels = []
         self.testLabels = []
@@ -38,9 +45,11 @@ class FNN:
 
     def initialize_parameters(self):
         input_size = self.trainSet.shape[1]
-        hidden1_size = 250
-        hidden2_size = 100
-        hidden3_size = 60
+        hidden1_size = 960
+        hidden2_size = 480
+        hidden3_size = 240
+        hidden4_size = 120
+        hidden5_size = 60
         output_size = 26
 
         self.weights1 = np.random.randn(input_size, hidden1_size)
@@ -49,21 +58,37 @@ class FNN:
         self.bias2 = np.zeros(hidden2_size)
         self.weights3 = np.random.randn(hidden2_size, hidden3_size)
         self.bias3 = np.zeros(hidden3_size)
-        self.weights4 = np.random.randn(hidden3_size, output_size)
-        self.bias4 = np.zeros(output_size)
+        self.weights4 = np.random.randn(hidden3_size, hidden4_size)
+        self.bias4 = np.zeros(hidden4_size)
+        self.weights5 = np.random.randn(hidden4_size, hidden5_size)
+        self.bias5 = np.zeros(hidden5_size)
+        self.weights6 = np.random.randn(hidden5_size, output_size)
+        self.bias6 = np.zeros(output_size)
 
+    @jit(parallel=True)
     def forward(self):
         self.hidden1_output = sigmoid(np.dot(self.current_set, self.weights1) + self.bias1)
         self.hidden2_output = sigmoid(np.dot(self.hidden1_output, self.weights2) + self.bias2)
         self.hidden3_output = sigmoid(np.dot(self.hidden2_output, self.weights3) + self.bias3)
-        self.predicted_output = sigmoid(np.dot(self.hidden3_output, self.weights4) + self.bias4)
+        self.hidden4_output = sigmoid(np.dot(self.hidden3_output, self.weights4) + self.bias4)
+        self.hidden5_output = sigmoid(np.dot(self.hidden4_output, self.weights5) + self.bias5)
+        self.predicted_output = sigmoid(np.dot(self.hidden5_output, self.weights6) + self.bias6)
 
+    @jit(parallel=True)
     def backward(self):
         output_error = self.trainLabels - self.predicted_output
-        self.weights4 += self.learning_rate * np.dot(self.hidden3_output.T, output_error)
-        self.bias4 += self.learning_rate * np.sum(output_error, axis=0)
+        self.weights6 += self.learning_rate * np.dot(self.hidden5_output.T, output_error)
+        self.bias6 += self.learning_rate * np.sum(output_error, axis=0)
 
-        hidden3_error = np.dot(output_error, self.weights4.T)
+        hidden5_error = np.dot(output_error, self.weights6.T)
+        self.weights5 += self.learning_rate * np.dot(self.hidden4_output.T, hidden5_error)
+        self.bias5 += self.learning_rate * np.sum(hidden5_error, axis=0)
+
+        hidden4_error = np.dot(hidden5_error, self.weights5.T)
+        self.weights4 += self.learning_rate * np.dot(self.hidden3_output.T, hidden4_error)
+        self.bias4 += self.learning_rate * np.sum(hidden4_error, axis=0)
+
+        hidden3_error = np.dot(hidden4_error, self.weights4.T)
         self.weights3 += self.learning_rate * np.dot(self.hidden2_output.T, hidden3_error)
         self.bias3 += self.learning_rate * np.sum(hidden3_error, axis=0)
 
