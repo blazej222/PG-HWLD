@@ -5,11 +5,12 @@ train_images_path = "../../resources/datasets/dataset-EMNIST/train-images"
 test_images_path = "../../resources/datasets/dataset-EMNIST/test-images"
 test_labels_path = "../../resources/datasets/dataset-EMNIST/test-labels.txt"
 
+#  FIXME: Something repeatedly raises exceptions when trying to call train and then test methods in 1 go
 if __name__ == '__main__':
     network = Network(None, None, None)
     network.create_cnn()
     network.training_testing_set(train_catalog=train_images_path, test_catalog=test_images_path)
-    network.train()
+    # network.train()
     network.test_catalog(test_images_path, test_labels_path)
 
     # for i in range(0, 26):
