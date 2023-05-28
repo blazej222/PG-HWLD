@@ -25,15 +25,15 @@ def rotateAll(location, destination, angle):
             if file.endswith(".png") or file.endswith(".jpg") or file.endswith(".bmp"):
                 image = cv2.imread(os.path.join(address, file))
                 rotated_image = image_rotate(image, angle)
-                rotated_image_name = f"{os.path.join(destination + address.replace(location, ''), os.path.splitext(file)[0])}_{angle}.bmp"
+                rotated_image_name = f"{os.path.join(destination + address.replace(location, ''), os.path.splitext(file)[0])}_{angle}.png"
                 cv2.imwrite(rotated_image_name, rotated_image)
 
     print(f"Dataset augmentation completed for catalog {location}, angle: {angle}")
 
 
 def main():
-    location = "../../resources/datasets/unpacked/dataset-multi-person"
-    destination = "../../resources/datasets/augmented/dataset-multi-person-augmented"
+    location = "../../resources/datasets/unpacked/dataset-single-person"
+    destination = "../../resources/datasets/augmented/dataset-single-person-augmented"
     rotateAll(location, destination, 15)
     rotateAll(location, destination, 10)
     rotateAll(location, destination, 5)
@@ -42,8 +42,8 @@ def main():
     rotateAll(location, destination, -10)
     rotateAll(location, destination, -15)
 
-    location = "../../resources/datasets/unpacked/dataset-multi-person-cropped-10"
-    destination = "../../resources/datasets/augmented/dataset-multi-person-cropped-10-augmented"
+    location = "../../resources/datasets/unpacked/dataset-single-person-cropped-10"
+    destination = "../../resources/datasets/augmented/dataset-single-person-cropped-10-augmented"
     rotateAll(location, destination, 15)
     rotateAll(location, destination, 10)
     rotateAll(location, destination, 5)
