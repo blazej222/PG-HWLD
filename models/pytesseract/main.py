@@ -2,8 +2,9 @@ import pytesseract
 from PIL import Image
 import os
 import multiprocessing as mp
+import time
 tesseractPath = "./bin/tesseract.exe"
-dataset_test = "../../resources/datasets/unpacked/dataset-klaudia/Testing" # temporary test path
+dataset_test = "../../resources/datasets/unpacked/dataset-multi-person-limited" # temporary test path
 
 pytesseract.pytesseract.tesseract_cmd = tesseractPath
 
@@ -35,6 +36,8 @@ def recognize(file,dir):
 
 if __name__ == '__main__':
 
+    start = time.time()
+
     for dir in directories:
         files = sorted(os.listdir(os.path.join(dataset_test, dir)))  # contains files
         pool = mp.Pool()
@@ -51,6 +54,6 @@ if __name__ == '__main__':
             ok_recognized += c
         print("Done directory {}".format(dir))
 
-
+    end = time.time()
     percentage = (flawlessly_recongized + ok_recognized) / dataset_size
-    print("Percentage was {}".format(percentage))
+    print("Percentage was {}. Finished in {}".format(percentage,end-start))
