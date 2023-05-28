@@ -2,7 +2,7 @@ import ntpath
 import numpy as np
 import cv2
 import os
-
+import multiprocessing as mp
 
 def image_transform(imageFile, denoise=True):
     imageFile = cv2.cvtColor(imageFile, cv2.COLOR_BGR2GRAY)
@@ -38,6 +38,14 @@ def flat_denoise(image, threshold):
 def sig(x, parameter):
     return 1 / (1 + np.exp((-parameter) * (x - 127)))
 
+def transformSingle(file,address,denoise,destination,location,removeOriginals):
+    if file.endswith(".png") or file.endswith(".jpg"):
+        image = cv2.imread(os.path.join(address, file))
+        transformed_image = image_transform(image, denoise)
+        transformed_image_name = f"{os.path.join(destination + address.replace(location, ''), os.path.splitext(file)[0])}.bmp"
+        cv2.imwrite(transformed_image_name, transformed_image)
+        if removeOriginals:
+            os.remove(os.path.join(address, file))
 
 def transformAll(location, destination, removeOriginals=False, denoise=True):
     if not os.path.exists(destination):
@@ -50,14 +58,10 @@ def transformAll(location, destination, removeOriginals=False, denoise=True):
             if not os.path.exists(os.path.join(temp, directory)):
                 os.makedirs(os.path.join(temp, directory))
 
-        for file in files:
-            if file.endswith(".png") or file.endswith(".jpg"):
-                image = cv2.imread(os.path.join(address, file))
-                transformed_image = image_transform(image, denoise)
-                transformed_image_name = f"{os.path.join(destination + address.replace(location, ''), os.path.splitext(file)[0])}.bmp"
-                cv2.imwrite(transformed_image_name, transformed_image)
-                if removeOriginals:
-                    os.remove(os.path.join(address, file))
+        pool = mp.Pool()
+        process = pool.starmap_async(transformSingle,[(x,address,denoise,destination,location,removeOriginals) for x in files])
+        pool.close()
+        pool.join()
 
     print(f"Image transformation completed for catalog {location}")
 
