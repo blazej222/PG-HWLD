@@ -154,6 +154,9 @@ class Network:
             for address, directories, files in os.walk(catalog):
                 process = pool.starmap_async(test_file, [(address, x, isLabelFile, test_by_folder, labelArray, label,
                                                           doPrint, self.cnn, files.index(x)) for x in files])
+        else:
+            process = pool.starmap_async(test_file, [(catalog, x, isLabelFile, test_by_folder, labelArray, label,
+                                                      doPrint, self.cnn, files.index(x)) for x in files])
 
         pool.close()
         pool.join()
