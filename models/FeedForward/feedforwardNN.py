@@ -14,6 +14,7 @@ def sigmoid_derivative(x):
 
 
 class FNN:
+    # FIXME: Adjust parameters
     def __init__(self):
         self.bias1 = None
         self.weights1 = None
