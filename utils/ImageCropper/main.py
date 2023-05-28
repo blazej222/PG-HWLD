@@ -73,19 +73,21 @@ def crop_black_letters_catalog(location, destination, margin, threshold):
 
     for address, dirs, files in os.walk(location):
         for directory in dirs:
-            if not os.path.exists(os.path.join(destination, directory)):
-                os.makedirs(os.path.join(destination, directory))
+            subdirectory = address.replace(location, "")
+            temp = destination + subdirectory
+            if not os.path.exists(os.path.join(temp, directory)):
+                os.makedirs(os.path.join(temp, directory))
 
         for file in files:
             image = cv2.imread(os.path.join(address, file))
             cropped_image = crop_black_letter(image, margin, threshold)
-            cv2.imwrite(os.path.join(destination, ntpath.basename(address)[0], file), cropped_image)
+            cv2.imwrite(os.path.join(destination + address.replace(location, ''), file), cropped_image)
 
     print(f"Cropping finished for catalog {location}")
 
 
 def main():
-    margin = 10
+    margin = 15
 
     # TEST RUN
     # input_image = cv2.imread("../../resources/uploaded-images/z.png")
