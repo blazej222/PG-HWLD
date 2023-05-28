@@ -1,10 +1,10 @@
+import ntpath
 import numpy as np
 import cv2
 import os
 
 
-def image_transform(filename, removeOriginals=True, denoise=True):
-    imageFile = cv2.imread(filename)
+def image_transform(imageFile, denoise=True):
     imageFile = cv2.cvtColor(imageFile, cv2.COLOR_BGR2GRAY)
     imageFile = cv2.normalize(imageFile, imageFile, 0, 255, cv2.NORM_MINMAX)
     if denoise:
@@ -13,11 +13,7 @@ def image_transform(filename, removeOriginals=True, denoise=True):
         # imageFile = cv2.fastNlMeansDenoising(imageFile, imageFile, 60.0, 7, 21)
         imageFile = flat_denoise(imageFile, 190)
     imageFile = cv2.resize(imageFile, dsize=(28, 28), interpolation=cv2.INTER_NEAREST)
-    # imageFile = flat_denoise(imageFile, 190)
-
-    cv2.imwrite("%s.bmp" % os.path.splitext(filename)[0], imageFile)
-    if removeOriginals:
-        os.remove(filename)
+    return imageFile
 
 
 def remove_shadows(image):
@@ -43,20 +39,34 @@ def sig(x, parameter):
     return 1 / (1 + np.exp((-parameter) * (x - 127)))
 
 
-def transformAll(location, removeOriginals=True, denoise=True):
+def transformAll(location, destination, removeOriginals=False, denoise=True):
+    if not os.path.exists(destination):
+        os.makedirs(destination)
+
     for address, dirs, files in os.walk(location):
+        for directory in dirs:
+            subdirectory = address.replace(location, "")
+            temp = destination + subdirectory
+            if not os.path.exists(os.path.join(temp, directory)):
+                os.makedirs(os.path.join(temp, directory))
+
         for file in files:
             if file.endswith(".png") or file.endswith(".jpg"):
-                image_transform(os.path.join(address, file), removeOriginals, denoise)
+                image = cv2.imread(os.path.join(address, file))
+                transformed_image = image_transform(image, denoise)
+                transformed_image_name = f"{os.path.join(destination + address.replace(location, ''), os.path.splitext(file)[0])}.bmp"
+                cv2.imwrite(transformed_image_name, transformed_image)
+                if removeOriginals:
+                    os.remove(os.path.join(address, file))
 
-        for directory in dirs:
-            transformAll(os.path.join(address, directory))
+    print(f"Image transformation completed for catalog {location}")
 
 
 def main():
-    folderName = "../../resources/datasets/unpacked/dataset-multi-person"
-    transformAll(folderName)
-    # transformAll("..\\uploaded-images", removeOriginals=False)
+    location = "../../resources/datasets/unpacked"
+    destination = "../../resources/datasets/transformed"
+    transformAll(location, destination)
+    # transformAll("../../resources/uploaded-images", "../../resources/uploaded-images", removeOriginals=False)
 
 
 if __name__ == '__main__':
