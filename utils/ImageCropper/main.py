@@ -87,7 +87,7 @@ def crop_black_letters_catalog(location, destination, margin, threshold):
 
 
 def main():
-    margin = 15
+    margin = 20
 
     # TEST RUN
     # input_image = cv2.imread("../../resources/uploaded-images/z.png")
