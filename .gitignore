@@ -1,2 +1,3 @@
 __pycache__/
+.idea
 #TODO: Remove indexed copies of bigfiles from this repo to make it a lot lighter
