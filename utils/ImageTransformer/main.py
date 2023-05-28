@@ -23,7 +23,7 @@ def remove_shadows(image):
     cv2.normalize(transformedImg, transformedImg, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8UC1)
     return transformedImg
 
-
+#TODO: Check if eliminating reshapes speeds things up
 def flat_denoise(image, threshold):
     width = image.shape[1]
     height = image.shape[0]
