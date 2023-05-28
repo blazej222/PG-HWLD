@@ -28,21 +28,29 @@ def rotateAll(location, destination, angle):
                 rotated_image_name = f"{os.path.join(destination + address.replace(location, ''), os.path.splitext(file)[0])}_{angle}.bmp"
                 cv2.imwrite(rotated_image_name, rotated_image)
 
-    print(f"Image transformation completed for catalog {location}")
+    print(f"Dataset augmentation completed for catalog {location}, angle: {angle}")
 
 
 def main():
-    # location = "../../resources/datasets/transformed/dataset-multi-person"
-    # destination = "../../resources/datasets/augmented/dataset-multi-person-augmented"
-    location = "../../resources/datasets/transformed/dataset-multi-person-cropped-10"
-    destination = "../../resources/datasets/augmented/dataset-multi-person-cropped-10-augmented"
-    rotateAll(location, destination, 30)
-    rotateAll(location, destination, 20)
+    location = "../../resources/datasets/unpacked/dataset-multi-person"
+    destination = "../../resources/datasets/augmented/dataset-multi-person-augmented"
+    rotateAll(location, destination, 15)
     rotateAll(location, destination, 10)
+    rotateAll(location, destination, 5)
     rotateAll(location, destination, 0)
+    rotateAll(location, destination, -5)
     rotateAll(location, destination, -10)
-    rotateAll(location, destination, -20)
-    rotateAll(location, destination, -30)
+    rotateAll(location, destination, -15)
+
+    location = "../../resources/datasets/unpacked/dataset-multi-person-cropped-10"
+    destination = "../../resources/datasets/augmented/dataset-multi-person-cropped-10-augmented"
+    rotateAll(location, destination, 15)
+    rotateAll(location, destination, 10)
+    rotateAll(location, destination, 5)
+    rotateAll(location, destination, 0)
+    rotateAll(location, destination, -5)
+    rotateAll(location, destination, -10)
+    rotateAll(location, destination, -15)
 
 
 if __name__ == '__main__':

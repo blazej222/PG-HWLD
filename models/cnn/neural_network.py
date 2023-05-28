@@ -8,13 +8,15 @@ from keras.layers import Dense, Flatten, MaxPooling2D, Conv2D
 from keras.preprocessing.image import ImageDataGenerator
 from keras.saving.legacy.model_config import model_from_json
 from keras.utils import load_img, img_to_array
+from keras.regularizers import l2
 import multiprocessing as mp
 
 import sys  # required to make imports from another directory work
-#sys.path.append('../../utils')
+# sys.path.append('../../utils')
 from utils.DataSetConverter import main as dsc
 
-def test_file( catalog, file, isLabelFile, test_by_folder, labelArray, label, doPrint,cnn,i):
+
+def test_file(catalog, file, isLabelFile, test_by_folder, labelArray, label, doPrint, cnn, i):
     correctCount = 0
     incorrectCount = 0
     tmpath = os.path.join(catalog, file)
@@ -43,6 +45,7 @@ def test_file( catalog, file, isLabelFile, test_by_folder, labelArray, label, do
 
     return [correctCount, incorrectCount]
 
+
 def find_letter(letter):
     max_prob = 0
     index = -1
@@ -63,15 +66,16 @@ class Network:
 
     def create_cnn(self):
         cnn = Sequential(
-            [Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 3)),
+            [Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 3), kernel_regularizer=l2(0.0005)),
              MaxPooling2D(2, 2),
-             Conv2D(64, (3, 3), activation='relu', input_shape=(28, 28, 3)),
+             Conv2D(64, (3, 3), activation='relu', input_shape=(28, 28, 3), kernel_regularizer=l2(0.0005)),
              MaxPooling2D(2, 2),
-             Conv2D(128, (3, 3), activation='relu', input_shape=(28, 28, 3)),
+             Conv2D(128, (3, 3), activation='relu', input_shape=(28, 28, 3), kernel_regularizer=l2(0.0005)),
              MaxPooling2D(2, 2),
              Flatten(),
              Dense(units=512, activation='relu'),
              Dense(units=26, activation='softmax')])
+
         cnn.compile(optimizer=keras.optimizers.RMSprop(learning_rate=0.001),
                     loss='categorical_crossentropy',
                     metrics=['accuracy'])
@@ -106,14 +110,13 @@ class Network:
         self.cnn.fit(self.trainSet,
                      # steps_per_epoch=1950,
                      epochs=3,
-                     validation_data=self.testSet)
+                     # validation_data=self.testSet
+                     )
 
         model_json = self.cnn.to_json()
         with open("cnn.json", "w") as json_file:
             json_file.write(model_json)
         self.cnn.save_weights("cnn.h5")
-
-
 
     def test(self, fileName):
         img = load_img(fileName)
@@ -146,13 +149,18 @@ class Network:
         print("Starting catalog tests")
 
         pool = mp.Pool()
-        process = pool.starmap_async(test_file,[(catalog,x,isLabelFile,test_by_folder,labelArray,label,doPrint,self.cnn,files.index(x)) for x in files])
+
+        if test_by_folder is True:
+            for address, directories, files in os.walk(catalog):
+                process = pool.starmap_async(test_file, [(address, x, isLabelFile, test_by_folder, labelArray, label,
+                                                          doPrint, self.cnn, files.index(x)) for x in files])
+
         pool.close()
         pool.join()
 
         result = process.get()
 
-        for a,b in result:
+        for a, b in result:
             correctCount += a
             incorrectCount += b
 
