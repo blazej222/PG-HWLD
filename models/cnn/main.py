@@ -1,12 +1,8 @@
 from neural_network import *
 
-# train_images_path = ".\\train-images"
-# test_images_path = ".\\test-images"
-# test_labels_path = ".\\test-labels.txt"
-
-train_images_path = "../../resources/datasets/unpacked/dataset-EMNIST/train-images"
-test_images_path = "../../resources/datasets/unpacked/dataset-EMNIST/test-images"
-test_labels_path = "../../resources/datasets/unpacked/dataset-EMNIST/test-labels.txt"
+train_images_path = "../../resources/datasets/dataset-EMNIST/train-images"
+test_images_path = "../../resources/datasets/dataset-EMNIST/test-images"
+test_labels_path = "../../resources/datasets/dataset-EMNIST/test-labels.txt"
 
 if __name__ == '__main__':
     network = Network(None, None, None)
