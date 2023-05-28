@@ -5,7 +5,7 @@ import os
 import multiprocessing as mp
 import time
 tesseractPath = "./bin/tesseract.exe"
-dataset_test = "../../resources/datasets/unpacked/dataset-multi-person-limited" # temporary test path
+dataset_test = "../../resources/datasets/transformed/dataset-multi-person-cropped-30" # temporary test path
 
 pytesseract.pytesseract.tesseract_cmd = tesseractPath
 
@@ -31,16 +31,23 @@ def recognize(file,dir):
     elif len(letter) > 1:
         if letter[0] == dir or letter[0] == dir.upper(): current_ok_recognized += 1
     else:
-        print(f"Letter {dir} from file {file} wrongly recognized as {letter}")
+        pass
+        #if len(letter) == 0:    letter = "null"
+        #print(f"{dir};{letter};{file}")
+        #print(f"Letter {dir} from file {file} wrongly recognized as {letter}")
     return [current_flawlessly_recongized,current_ok_recognized]
 
 if __name__ == '__main__':
+    print(dataset_test)
 
     start = time.time()
 
     for dir in directories:
+        this_dir_flawless = 0
+        this_dir_ok = 0
         files = sorted(os.listdir(os.path.join(dataset_test, dir)))  # contains files
         pool = mp.Pool()
+
         processmap = pool.starmap_async(recognize,[(file,dir) for file in files]) # Async currently works only on directory level
 
         pool.close()
@@ -50,9 +57,11 @@ if __name__ == '__main__':
         dataset_size += len(files)
 
         for b,c in results:
-            flawlessly_recongized += b
-            ok_recognized += c
-        print("Done directory {}".format(dir))
+            this_dir_flawless += b
+            this_dir_ok += c
+        print(f"Done directory {dir}. Accuracy was {(this_dir_flawless + this_dir_ok) / len(files)}")
+        flawlessly_recongized +=this_dir_flawless
+        ok_recognized += this_dir_ok
 
     end = time.time()
     percentage = (flawlessly_recongized + ok_recognized) / dataset_size
