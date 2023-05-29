@@ -4,11 +4,12 @@ import os
 import keras
 import numpy as np
 from keras import Sequential
-from keras.layers import Dense, Flatten, MaxPooling2D, Conv2D
+from keras.layers import Dense, Flatten, MaxPooling2D, Conv2D, Dropout
 from keras.preprocessing.image import ImageDataGenerator
 from keras.saving.legacy.model_config import model_from_json
 from keras.utils import load_img, img_to_array
 from keras.regularizers import l2
+from sklearn.model_selection import train_test_split
 import multiprocessing as mp
 
 import sys  # required to make imports from another directory work
@@ -66,14 +67,16 @@ class Network:
 
     def create_cnn(self):
         cnn = Sequential(
-            [Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 3)),
+            [Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 3), kernel_regularizer=l2(0.0005)),
              MaxPooling2D(2, 2),
-             Conv2D(64, (3, 3), activation='relu', input_shape=(28, 28, 3)),
+             Conv2D(64, (3, 3), activation='relu', kernel_regularizer=l2(0.0005)),
              MaxPooling2D(2, 2),
-             Conv2D(128, (3, 3), activation='relu', input_shape=(28, 28, 3)),
+             Conv2D(128, (3, 3), activation='relu', kernel_regularizer=l2(0.0005)),
              MaxPooling2D(2, 2),
              Flatten(),
              Dense(units=512, activation='relu'),
+             # Dropout(0.5),
+             # Dense(units=64, activation='relu'),
              Dense(units=26, activation='softmax')])
 
         cnn.compile(optimizer=keras.optimizers.RMSprop(learning_rate=0.001),
@@ -83,6 +86,7 @@ class Network:
         self.cnn = cnn
 
     def training_testing_set(self, train_catalog, test_catalog):
+
         trainDataGen = ImageDataGenerator(rescale=1. / 255)
         self.trainSet = trainDataGen.flow_from_directory(
             directory=train_catalog,
@@ -110,7 +114,8 @@ class Network:
         self.cnn.fit(self.trainSet,
                      # steps_per_epoch=1950,
                      epochs=3,
-                     # validation_data=self.testSet
+                     validation_data=self.testSet,
+                     verbose=1
                      )
 
         model_json = self.cnn.to_json()

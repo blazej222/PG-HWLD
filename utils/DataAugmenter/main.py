@@ -32,8 +32,8 @@ def rotateAll(location, destination, angle):
 
 
 def main():
-    location = "../../resources/datasets/unpacked/dataset-single-person"
-    destination = "../../resources/datasets/augmented/dataset-single-person-augmented"
+    location = "../../resources/datasets/unpacked/dataset-multi-person-cropped-20"
+    destination = "../../resources/datasets/augmented/dataset-multi-person-cropped-20-augmented"
     rotateAll(location, destination, 15)
     rotateAll(location, destination, 10)
     rotateAll(location, destination, 5)
@@ -42,8 +42,8 @@ def main():
     rotateAll(location, destination, -10)
     rotateAll(location, destination, -15)
 
-    location = "../../resources/datasets/unpacked/dataset-single-person-cropped-10"
-    destination = "../../resources/datasets/augmented/dataset-single-person-cropped-10-augmented"
+    location = "../../resources/datasets/unpacked/dataset-single-person-cropped-20"
+    destination = "../../resources/datasets/augmented/dataset-single-person-cropped-20-augmented"
     rotateAll(location, destination, 15)
     rotateAll(location, destination, 10)
     rotateAll(location, destination, 5)
