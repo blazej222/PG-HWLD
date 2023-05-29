@@ -118,13 +118,14 @@ def main():
     filename = "../../resources/datasets/archives/EMNIST-binary/emnist-letters-train-images-idx3-ubyte"
     labelFile = "../../resources/datasets/archives/EMNIST-binary/emnist-letters-train-labels-idx1-ubyte"
     location = "../../resources/datasets/dataset-EMNIST/train-images"
-    array_to_images_sorted(filename, location, labelFile)
+    #array_to_images_sorted(filename, location, labelFile)
 
     filename = "../../resources/datasets/archives/EMNIST-binary/emnist-letters-test-images-idx3-ubyte"
     labelFile = "../../resources/datasets/archives/EMNIST-binary/emnist-letters-test-labels-idx1-ubyte"
     location = "../../resources/datasets/dataset-EMNIST/test-images"
-    numImages = array_to_images(filename, location)
-    labelFile_to_txt(labelFile, "../../resources/datasets/dataset-EMNIST/test-labels.txt", numImages)
+    #numImages = array_to_images(filename, location)
+    #labelFile_to_txt(labelFile, "../../resources/datasets/dataset-EMNIST/test-labels.txt", numImages)
+    array_to_images_sorted(filename, location, labelFile)
 
 
 if __name__ == '__main__':
