@@ -33,7 +33,7 @@ def cut_image(image_path, destination, crop_width, crop_height, left_margin, upp
             cropped_image = image.crop((left, upper, right, lower))
 
             # Save the cropped image
-            cropped_image.save(subdirectory + f"/{ntpath.basename(image_path)[0]}_{y * num_tiles_x + x + 1}_{hash(image_path)}.png")
+            cropped_image.save(subdirectory + f"/{ntpath.basename(image_path)[0]}_{y * num_tiles_x + x + 1}_{hash(subdirectory)}.png")
 
     print(f"Image division for {ntpath.basename(image_path)[0]} completed successfully.")
 

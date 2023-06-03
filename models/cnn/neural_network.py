@@ -9,7 +9,6 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.saving.legacy.model_config import model_from_json
 from keras.utils import load_img, img_to_array
 from keras.regularizers import l2
-from sklearn.model_selection import train_test_split
 import multiprocessing as mp
 
 import sys  # required to make imports from another directory work
@@ -151,7 +150,7 @@ class Network:
             print("Invalid arguments to test_catalog")
             return
 
-        print("Starting catalog tests")
+        print(f"Starting catalog test sequence for {catalog}")
 
         pool = mp.Pool()
 
