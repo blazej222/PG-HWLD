@@ -61,7 +61,8 @@ momentum = 0.5
 log_interval = 500
 use_custom_loader = True
 debug_print = True
-
+custom_loader_test_path = 'C:/Users/Blazej/Desktop/tmp/dataset-EMNIST/test-images'
+custom_loader_train_path = 'C:/Users/Blazej/Desktop/tmp/dataset-EMNIST/train-images'
 
 
 test_dataset = []
@@ -71,7 +72,7 @@ train_dataset = []
 
 if use_custom_loader:
 
-    train_dataset = CustomDataset('../../resources/datasets/dataset-EMNIST/train-images',
+    train_dataset = CustomDataset(custom_loader_train_path,
                                   transform=torchvision.transforms.Compose([
                                       #torchvision.transforms.RandomPerspective(),
                                       #torchvision.transforms.RandomRotation(10, fill=(0,)),
@@ -80,7 +81,7 @@ if use_custom_loader:
                                           (0.1307,), (0.3081,))
                                   ]), train=True)
 
-    test_dataset = CustomDataset('../../resources/datasets/dataset-EMNIST/test-images',
+    test_dataset = CustomDataset(custom_loader_test_path,
                                  transform=torchvision.transforms.Compose([
                                      torchvision.transforms.ToTensor(),
                                      torchvision.transforms.Normalize(
@@ -384,7 +385,7 @@ for epoch in range(num_epochs):
                    .format(epoch+1, num_epochs, i+1, total_step, loss2.item()))
 
 
-        
+
     # Test the model
     model1.eval()
     model2.eval()
