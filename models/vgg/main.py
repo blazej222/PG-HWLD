@@ -15,7 +15,7 @@ import math
 import torch.nn.functional as F
 import numpy as np
 import matplotlib.pyplot as plt
-
+import string
 
 class CustomDataset(VisionDataset):
     def __init__(self, root, transform=None, train=True):
@@ -384,8 +384,8 @@ for epoch in range(num_epochs):
             print ("Spinal Epoch [{}/{}], Step [{}/{}] Loss: {:.4f}"
                    .format(epoch+1, num_epochs, i+1, total_step, loss2.item()))
 
-
-
+    letter_accuracy1 = {letter: {'correct': 0, 'total': 0} for letter in string.ascii_lowercase}
+    letter_accuracy2 = {letter: {'correct': 0, 'total': 0} for letter in string.ascii_lowercase}
     # Test the model
     model1.eval()
     model2.eval()
@@ -403,11 +403,26 @@ for epoch in range(num_epochs):
             _, predicted = torch.max(outputs.data, 1)
             total1 += labels.size(0)
             correct1 += (predicted == labels).sum().item()
+
+            # Update letter accuracy statistics
+            for i in range(len(labels)):
+                label = labels[i].item()
+                letter = chr(label + 96)
+                letter_accuracy1[letter]['total'] += 1
+                if predicted[i] == label:
+                    letter_accuracy1[letter]['correct'] += 1
             
             outputs = model2(images)
             _, predicted = torch.max(outputs.data, 1)
             total2 += labels.size(0)
             correct2 += (predicted == labels).sum().item()
+
+            for i in range(len(labels)):
+                label = labels[i].item()
+                letter = chr(label + 96)
+                letter_accuracy2[letter]['total'] += 1
+                if predicted[i] == label:
+                    letter_accuracy2[letter]['correct'] += 1
     
         
         if best_accuracy1>= correct1 / total1:
@@ -430,7 +445,16 @@ for epoch in range(num_epochs):
             net_opt2 = model2
             print('Test Accuracy of SpinalNet: {} % (improvement)'.format(100 * correct2 / total2))
 
-        
-            
+    # Print letter accuracy statistics
+    print('Letter Accuracy for NN:')
+    for letter, accuracy in letter_accuracy1.items():
+        accuracy_percentage = accuracy['correct'] / accuracy['total'] * 100
+        print('{}: {} %'.format(letter, accuracy_percentage))
+
+    print('Letter Accuracy for SpinalNet:')
+    for letter, accuracy in letter_accuracy2.items():
+        accuracy_percentage = accuracy['correct'] / accuracy['total'] * 100
+        print('{}: {} %'.format(letter, accuracy_percentage))
+
         model1.train()
         model2.train()
