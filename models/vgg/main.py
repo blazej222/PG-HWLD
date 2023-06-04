@@ -16,6 +16,7 @@ import torch.nn.functional as F
 import numpy as np
 import matplotlib.pyplot as plt
 import string
+import PIL.ImageOps
 
 class CustomDataset(VisionDataset):
     def __init__(self, root, transform=None, train=True):
@@ -44,6 +45,10 @@ class CustomDataset(VisionDataset):
     def __getitem__(self, index):
         file_path, label = self.file_list[index]
         image = Image.open(file_path)
+        if(reverse_test_images_colors):
+            image = PIL.ImageOps.invert(image) # reverse colors
+            image = image.rotate(270)
+            image = image.transpose(Image.FLIP_LEFT_RIGHT)
 
         if self.transform is not None:
             image = self.transform(image)
@@ -59,8 +64,9 @@ batch_size_test = 1000
 learning_rate = 0.005
 momentum = 0.5
 log_interval = 500
-use_custom_train_loader = True
+use_custom_train_loader = False
 use_custom_test_loader = True
+reverse_test_images_colors = True
 debug_print = True
 custom_loader_test_path = 'C:/Users/Blazej/Desktop/tmp/dataset-EMNIST/test-images'
 custom_loader_train_path = 'C:/Users/Blazej/Desktop/tmp/dataset-EMNIST/train-images'
