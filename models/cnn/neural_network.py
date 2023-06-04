@@ -88,21 +88,13 @@ class Network:
 
     def create_simple_cnn(self):
         cnn = Sequential(
-            [Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 3), kernel_regularizer=l2(0.0005)),
-             Conv2D(32, (3, 3), activation='relu', kernel_regularizer=l2(0.0005)),
-             Conv2D(32, (5, 5), activation='relu', strides=2, padding='same', kernel_regularizer=l2(0.0005)),
-             Dropout(0.4),
-
+            [Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1), kernel_regularizer=l2(0.0005)),
+             MaxPooling2D(2, 2),
              Conv2D(64, (3, 3), activation='relu', kernel_regularizer=l2(0.0005)),
-             Conv2D(64, (3, 3), activation='relu', kernel_regularizer=l2(0.0005)),
-             Conv2D(64, (5, 5), activation='relu', strides=2, padding='same', kernel_regularizer=l2(0.0005)),
-             Dropout(0.4),
-
-             Conv2D(128, (4, 4), activation='relu', kernel_regularizer=l2(0.0005)),
+             MaxPooling2D(2, 2),
+             Conv2D(128, (3, 3), activation='relu', kernel_regularizer=l2(0.0005)),
              Flatten(),
              Dense(units=512, activation='relu'),
-             Dropout(0.4),
-
              Dense(units=26, activation='softmax')])
 
         cnn.compile(optimizer='adam',
@@ -141,7 +133,7 @@ class Network:
         # json does not exist
         self.cnn.fit(self.trainSet,
                      # steps_per_epoch=1950,
-                     epochs=15,
+                     epochs=5,
                      validation_data=self.testSet,
                      verbose=1
                      )
