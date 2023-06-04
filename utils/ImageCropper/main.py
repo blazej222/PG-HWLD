@@ -88,19 +88,20 @@ def crop_black_letters_catalog(location, destination, margin, threshold):
 
 
 def main():
-    margin = 20
+    margin = 30
 
     # TEST RUN
     # input_image = cv2.imread("../../resources/uploaded-images/z.png")
     # cv2.imwrite("../../resources/uploaded-images/z-cropped.png", img=crop_black_letter(input_image, margin, threshold=10))
+    # crop_black_letters_catalog("../../resources/uploaded-images", "../../resources/preprocessed-images", margin, threshold=100)
 
-    # crop_black_letters_catalog("../../resources/datasets/unpacked/dataset-multi-person",
-    #                           f"../../resources/datasets/unpacked/dataset-multi-person-cropped-{margin}", margin, threshold=100)
-    # crop_black_letters_catalog("../../resources/datasets/unpacked/dataset-single-person",
-    #                           f"../../resources/datasets/unpacked/dataset-single-person-cropped-{margin}", margin, threshold=100)
+    crop_black_letters_catalog("../../resources/datasets/unpacked/dataset-multi-person",
+                              f"../../resources/datasets/unpacked/dataset-multi-person-cropped-{margin}", margin, threshold=100)
+    crop_black_letters_catalog("../../resources/datasets/unpacked/dataset-single-person",
+                              f"../../resources/datasets/unpacked/dataset-single-person-cropped-{margin}", margin, threshold=100)
 
 
-    crop_black_letters_catalog("../../resources/uploaded-images", "../../resources/preprocessed-images", margin, threshold=100)
+
 
 if __name__ == '__main__':
     main()
