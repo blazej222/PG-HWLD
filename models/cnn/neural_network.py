@@ -4,7 +4,7 @@ import os
 import keras
 import numpy as np
 from keras import Sequential
-from keras.layers import Dense, Flatten, MaxPooling2D, Conv2D, Dropout
+from keras.layers import Dense, Flatten, MaxPooling2D, Conv2D, Dropout, BatchNormalization
 from keras.preprocessing.image import ImageDataGenerator
 from keras.saving.legacy.model_config import model_from_json
 from keras.utils import load_img, img_to_array
@@ -16,20 +16,18 @@ import sys  # required to make imports from another directory work
 from utils.DataSetConverter import main as dsc
 
 
-def test_file(catalog, file, isLabelFile, test_by_folder, labelArray, label, doPrint, cnn, i):
+def test_file(catalog, file, test_by_folder, label, doPrint, cnn):
     correctCount = 0
     incorrectCount = 0
     tmpath = os.path.join(catalog, file)
     tmpath = os.path.normpath(tmpath)
-    img = load_img(tmpath, target_size=(28, 28))
+    img = load_img(tmpath, target_size=(28, 28), color_mode='grayscale')
     imgArray = img_to_array(img)
     imgArray = np.expand_dims(imgArray, axis=0)
     imgArray = np.vstack([imgArray])
     predictedLetter = cnn.predict(imgArray, verbose=0)
     predictedLetter = find_letter(predictedLetter)
-    if isLabelFile:
-        actualLetter = chr(labelArray[i] + 97)
-    elif test_by_folder:
+    if test_by_folder:
         actualLetter = ntpath.basename(catalog)[0]
     else:
         actualLetter = label
@@ -66,19 +64,48 @@ class Network:
 
     def create_cnn(self):
         cnn = Sequential(
-            [Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 3), kernel_regularizer=l2(0.0005)),
-             MaxPooling2D(2, 2),
+            [Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1), kernel_regularizer=l2(0.0005)),
+             Conv2D(32, (3, 3), activation='relu', kernel_regularizer=l2(0.0005)),
+             Conv2D(32, (5, 5), activation='relu', strides=2, padding='same', kernel_regularizer=l2(0.0005)),
+             Dropout(0.4),
+
              Conv2D(64, (3, 3), activation='relu', kernel_regularizer=l2(0.0005)),
-             MaxPooling2D(2, 2),
-             Conv2D(128, (3, 3), activation='relu', kernel_regularizer=l2(0.0005)),
-             MaxPooling2D(2, 2),
+             Conv2D(64, (3, 3), activation='relu', kernel_regularizer=l2(0.0005)),
+             Conv2D(64, (5, 5), activation='relu', strides=2, padding='same', kernel_regularizer=l2(0.0005)),
+             Dropout(0.4),
+
+             Conv2D(128, (4, 4), activation='relu', kernel_regularizer=l2(0.0005)),
              Flatten(),
-             Dense(units=512, activation='relu'),
-             # Dropout(0.5),
-             # Dense(units=64, activation='relu'),
+             Dropout(0.4),
+
              Dense(units=26, activation='softmax')])
 
-        cnn.compile(optimizer=keras.optimizers.RMSprop(learning_rate=0.001),
+        cnn.compile(optimizer='adam',
+                    loss='categorical_crossentropy',
+                    metrics=['accuracy'])
+        cnn.summary()
+        self.cnn = cnn
+
+    def create_simple_cnn(self):
+        cnn = Sequential(
+            [Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 3), kernel_regularizer=l2(0.0005)),
+             Conv2D(32, (3, 3), activation='relu', kernel_regularizer=l2(0.0005)),
+             Conv2D(32, (5, 5), activation='relu', strides=2, padding='same', kernel_regularizer=l2(0.0005)),
+             Dropout(0.4),
+
+             Conv2D(64, (3, 3), activation='relu', kernel_regularizer=l2(0.0005)),
+             Conv2D(64, (3, 3), activation='relu', kernel_regularizer=l2(0.0005)),
+             Conv2D(64, (5, 5), activation='relu', strides=2, padding='same', kernel_regularizer=l2(0.0005)),
+             Dropout(0.4),
+
+             Conv2D(128, (4, 4), activation='relu', kernel_regularizer=l2(0.0005)),
+             Flatten(),
+             Dense(units=512, activation='relu'),
+             Dropout(0.4),
+
+             Dense(units=26, activation='softmax')])
+
+        cnn.compile(optimizer='adam',
                     loss='categorical_crossentropy',
                     metrics=['accuracy'])
         cnn.summary()
@@ -90,6 +117,7 @@ class Network:
         self.trainSet = trainDataGen.flow_from_directory(
             directory=train_catalog,
             target_size=(28, 28),
+            color_mode='grayscale',
             batch_size=64,
             class_mode='categorical')
 
@@ -97,6 +125,7 @@ class Network:
         self.testSet = testDataGen.flow_from_directory(
             directory=test_catalog,
             target_size=(28, 28),
+            color_mode='grayscale',
             batch_size=64)
 
     def train(self):
@@ -112,7 +141,7 @@ class Network:
         # json does not exist
         self.cnn.fit(self.trainSet,
                      # steps_per_epoch=1950,
-                     epochs=3,
+                     epochs=15,
                      validation_data=self.testSet,
                      verbose=1
                      )
@@ -132,43 +161,49 @@ class Network:
         print("Predicted letter: " + predictedLetter)
 
     #  TODO: Check if there's a cleaner way to implement this
-    def test_catalog(self, catalog, labelFileName=None, label=None, doPrint=False, test_by_folder=False):
-        i = 0
+    def test_catalog(self, catalog, label=None, doPrint=False, test_by_folder=False, echo=True):
         correctCount = 0
         incorrectCount = 0
-        isLabelFile = None
-        labelArray = 0
 
         files = sorted(os.listdir(catalog), key=len)
 
-        if labelFileName is not None:
-            labelArray = dsc.txt_labelFile_to_array(labelFileName, len(files))
-            isLabelFile = True
-        elif label is not None or test_by_folder is True:
-            isLabelFile = False
-        else:
+        if label is None and test_by_folder is False:
             print("Invalid arguments to test_catalog")
             return
 
-        print(f"Starting catalog test sequence for {catalog}")
+        if echo is True:
+            print(f"Starting catalog test sequence for {catalog}")
 
         pool = mp.Pool()
+        process = []
 
         if test_by_folder is True:
             for address, directories, files in os.walk(catalog):
-                process = pool.starmap_async(test_file, [(address, x, isLabelFile, test_by_folder, labelArray, label,
-                                                          doPrint, self.cnn, files.index(x)) for x in files])
+                for directory in directories:
+                    process.append(
+                        pool.starmap_async(test_file, [(os.path.join(address, directory), x, test_by_folder, label,
+                                                        doPrint, self.cnn) for x in
+                                                       sorted(os.listdir(os.path.join(address, directory)), key=len)]))
+                    if echo is True:
+                        print(f"Starting process for {os.path.join(address, directory)}")
+            pool.close()
+            pool.join()
+
+            for p in process:
+                result = p.get()
+                for a, b in result:
+                    correctCount += a
+                    incorrectCount += b
         else:
-            process = pool.starmap_async(test_file, [(catalog, x, isLabelFile, test_by_folder, labelArray, label,
-                                                      doPrint, self.cnn, files.index(x)) for x in files])
+            process = pool.starmap_async(test_file, [(catalog, x, test_by_folder, label,
+                                                      doPrint, self.cnn) for x in files])
+            pool.close()
+            pool.join()
 
-        pool.close()
-        pool.join()
+            result = process.get()
 
-        result = process.get()
-
-        for a, b in result:
-            correctCount += a
-            incorrectCount += b
+            for a, b in result:
+                correctCount += a
+                incorrectCount += b
 
         print("Accuracy: " + str(correctCount / (correctCount + incorrectCount)))
