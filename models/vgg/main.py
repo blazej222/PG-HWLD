@@ -59,7 +59,8 @@ batch_size_test = 1000
 learning_rate = 0.005
 momentum = 0.5
 log_interval = 500
-use_custom_loader = True
+use_custom_train_loader = True
+use_custom_test_loader = True
 debug_print = True
 custom_loader_test_path = 'C:/Users/Blazej/Desktop/tmp/dataset-EMNIST/test-images'
 custom_loader_train_path = 'C:/Users/Blazej/Desktop/tmp/dataset-EMNIST/train-images'
@@ -70,7 +71,7 @@ train_dataset = []
 
 #../../resources/datasets/transformed/dataset-multi-person
 
-if use_custom_loader:
+if use_custom_train_loader:
 
     train_dataset = CustomDataset(custom_loader_train_path,
                                   transform=torchvision.transforms.Compose([
@@ -81,6 +82,25 @@ if use_custom_loader:
                                           (0.1307,), (0.3081,))
                                   ]), train=True)
 
+
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size_train, shuffle=True)
+
+else:
+    train_loader = torch.utils.data.DataLoader(
+        torchvision.datasets.EMNIST('../../resources/datasets/archives/emnist_download/train', split='letters',
+                                    train=True, download=True,
+                                    transform=torchvision.transforms.Compose([
+                                        #torchvision.transforms.RandomPerspective(),
+                                        #torchvision.transforms.RandomRotation(10, fill=(0,)),
+                                        torchvision.transforms.ToTensor(),
+                                        torchvision.transforms.Normalize(
+                                            (0.1307,), (0.3081,))
+                                    ])),
+        batch_size=batch_size_train, shuffle=True)
+    train_dataset = train_loader.dataset
+
+if use_custom_test_loader:
+
     test_dataset = CustomDataset(custom_loader_test_path,
                                  transform=torchvision.transforms.Compose([
                                      torchvision.transforms.ToTensor(),
@@ -88,19 +108,8 @@ if use_custom_loader:
                                          (0.1307,), (0.3081,))
                                  ]), train=False)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size_test, shuffle=True)
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size_train, shuffle=True)
+
 else:
-    train_loader = torch.utils.data.DataLoader(
-        torchvision.datasets.EMNIST('../../resources/datasets/archives/emnist_download/train', split='letters',
-                                    train=True, download=True,
-                                    transform=torchvision.transforms.Compose([
-                                        torchvision.transforms.RandomPerspective(),
-                                        torchvision.transforms.RandomRotation(10, fill=(0,)),
-                                        torchvision.transforms.ToTensor(),
-                                        torchvision.transforms.Normalize(
-                                            (0.1307,), (0.3081,))
-                                    ])),
-        batch_size=batch_size_train, shuffle=True)
     test_loader = torch.utils.data.DataLoader(
         torchvision.datasets.EMNIST('../../resources/datasets/archives/emnist_download/test', split='letters',
                                     train=False, download=True,
@@ -110,7 +119,6 @@ else:
                                             (0.1307,), (0.3081,))
                                     ])),
         batch_size=batch_size_test, shuffle=True)
-    train_dataset = train_loader.dataset
     test_dataset = test_loader.dataset
 
 if debug_print:
