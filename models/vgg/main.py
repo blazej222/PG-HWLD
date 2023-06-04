@@ -5,8 +5,9 @@ This code trains both NNs as two different models.
 This code randomly changes the learning rate to get a good result.
 @author: Dipu
 """
-
-
+from torchvision.datasets import VisionDataset
+import os
+from PIL import Image
 import torch
 import torchvision
 import torch.nn as nn
@@ -14,12 +15,50 @@ import math
 import torch.nn.functional as F
 import numpy as np
 
+
+class CustomDataset(VisionDataset):
+    def __init__(self, root, transform=None, train=True):
+        super(CustomDataset, self).__init__(root, transform=transform)
+        self.train = train
+        self.classes = sorted(os.listdir(root))
+        self.file_list = []
+
+        if self.train:
+            for class_name in self.classes:
+                class_path = os.path.join(root, class_name)
+                if os.path.isdir(class_path):
+                    files = os.listdir(class_path)
+                    self.file_list.extend(
+                        [(os.path.join(class_path, f), self.classes.index(class_name)) for f in files])
+        else:
+            # self.file_list = [(os.path.join(root, f), 0) for f in os.listdir(root) if
+            #                   os.path.isfile(os.path.join(root, f))]
+            for address, dirs, files in os.walk(root):
+                for file in files:
+                    dirname = address.split(os.path.sep)[-1]
+                    self.file_list.append((os.path.normpath(os.path.join(address,file)),ord(dirname)-96))
+
+        self.transform = transform
+
+    def __getitem__(self, index):
+        file_path, label = self.file_list[index]
+        image = Image.open(file_path)
+
+        if self.transform is not None:
+            image = self.transform(image)
+
+        return image, label
+
+    def __len__(self):
+        return len(self.file_list)
+
 num_epochs = 200
 batch_size_train = 100
 batch_size_test = 1000
 learning_rate = 0.005
 momentum = 0.5
 log_interval = 500
+use_custom_loader = False
 
 
 
@@ -27,23 +66,49 @@ log_interval = 500
 train_loader = torch.utils.data.DataLoader(
   torchvision.datasets.EMNIST('../../resources/datasets/archives/emnist_download/train', split='letters', train=True, download=True,
                              transform=torchvision.transforms.Compose([
-                               torchvision.transforms.RandomPerspective(), 
-                               torchvision.transforms.RandomRotation(10, fill=(0,)), 
+                               torchvision.transforms.RandomPerspective(),
+                               torchvision.transforms.RandomRotation(10, fill=(0,)),
                                torchvision.transforms.ToTensor(),
                                torchvision.transforms.Normalize(
                                  (0.1307,), (0.3081,))
                              ])),
   batch_size=batch_size_train, shuffle=True)
 
-test_loader = torch.utils.data.DataLoader(
-  torchvision.datasets.EMNIST('../../resources/datasets/archives/emnist_download/test', split='letters', train=False, download=True,
-                             transform=torchvision.transforms.Compose([
-                               torchvision.transforms.ToTensor(),
-                               torchvision.transforms.Normalize(
-                                 (0.1307,), (0.3081,))
-                             ])),
-  batch_size=batch_size_test, shuffle=True)
+test_dataset = []
 
+#../../resources/datasets/transformed/dataset-multi-person
+
+if use_custom_loader:
+    test_dataset = CustomDataset('../../resources/datasets/dataset-EMNIST/test-images',
+                                 transform=torchvision.transforms.Compose([
+                                     torchvision.transforms.ToTensor(),
+                                     torchvision.transforms.Normalize(
+                                         (0.1307,), (0.3081,))
+                                 ]), train=False)
+    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size_test, shuffle=True)
+
+else:
+    test_loader = torch.utils.data.DataLoader(
+        torchvision.datasets.EMNIST('../../resources/datasets/archives/emnist_download/test', split='letters',
+                                    train=False, download=True,
+                                    transform=torchvision.transforms.Compose([
+                                        torchvision.transforms.ToTensor(),
+                                        torchvision.transforms.Normalize(
+                                            (0.1307,), (0.3081,))
+                                    ])),
+        batch_size=batch_size_test, shuffle=True)
+
+# train_dataset = CustomDataset('../../resources/datasets/dataset-EMNIST/train-images', transform=torchvision.transforms.Compose([
+#                                torchvision.transforms.RandomPerspective(),
+#                                torchvision.transforms.RandomRotation(10, fill=(0,)),
+#                                torchvision.transforms.ToTensor(),
+#                                torchvision.transforms.Normalize(
+#                                  (0.1307,), (0.3081,))
+#                              ]), train=True)
+
+
+
+# train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size_train, shuffle=True)
 examples = enumerate(test_loader)
 batch_idx, (example_data, example_targets) = next(examples)
 
@@ -322,7 +387,8 @@ for epoch in range(num_epochs):
     
         
         if best_accuracy1>= correct1 / total1:
-            curr_lr1 = learning_rate*np.asscalar(pow(np.random.rand(1),3))
+            # curr_lr1 = learning_rate*np.asscalar(pow(np.random.rand(1),3))
+            curr_lr1 = learning_rate * np.ndarray.item(pow(np.random.rand(1), 3))
             update_lr(optimizer1, curr_lr1)
             print('Test Accuracy of NN: {} % Best: {} %'.format(100 * correct1 / total1, 100*best_accuracy1))
         else:
@@ -331,7 +397,8 @@ for epoch in range(num_epochs):
             print('Test Accuracy of NN: {} % (improvement)'.format(100 * correct1 / total1))
             
         if best_accuracy2>= correct2 / total2:
-            curr_lr2 = learning_rate*np.asscalar(pow(np.random.rand(1),3))
+            # curr_lr2 = learning_rate*np.asscalar(pow(np.random.rand(1),3))
+            curr_lr2 = learning_rate * np.ndarray.item(pow(np.random.rand(1), 3))
             update_lr(optimizer2, curr_lr2)
             print('Test Accuracy of SpinalNet: {} % Best: {} %'.format(100 * correct2 / total2, 100*best_accuracy2))
         else:
