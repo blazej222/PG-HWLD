@@ -1,4 +1,5 @@
 import os
+import string
 from tkinter import Image
 from PIL import Image
 import numpy as np
@@ -105,19 +106,45 @@ class FNN:
 
     def predict(self, epoch, dir_name):
         if epoch == -1:
+            # print accuracy
+            self.current_set = self.test_set
+            self.forward()
             pyplot.plot(self.epoch_arr, self.accuracy_arr)
-            pyplot.ylabel("Accuracy")
-            pyplot.xlabel("Epoch")
+            pyplot.ylabel("Dokładność")
+            pyplot.xlabel("Epoki")
             pyplot.grid()
-            pyplot.title("Model accuracy for set " + dir_name)
+            pyplot.title("Dokładność rozpoznania liter w zależności od epoki dla zbioru " + dir_name)
             pyplot.savefig(dir_name + "_accuracy_plot.png")
-
+            pyplot.close()
+            # print loss
             pyplot.plot(self.loss)
-            pyplot.ylabel("Loss")
-            pyplot.xlabel("Epoch")
+            pyplot.ylabel("Strata")
+            pyplot.xlabel("Epoki")
             pyplot.grid()
-            pyplot.title("Model loss for set " + dir_name)
+            pyplot.title("Funkcja straty w zależności od epoki dla zbioru " + dir_name)
             pyplot.savefig(dir_name + "_loss_plot.png")
+            pyplot.close()
+            # print accuracy for every letter
+            letters_accuracy = []
+            predicted_labels = np.argmax(self.predicted_output, axis=1)
+            correct = 0
+            nb_of_letters = 0
+            for i in range(len(predicted_labels)):
+                nb_of_letters += 1
+                if predicted_labels[i] == self.test_labels[i]:
+                    correct += 1
+                if i == (len(predicted_labels) - 1):
+                    letters_accuracy.append(correct / nb_of_letters)
+                else:
+                    if self.test_labels[i] != self.test_labels[i + 1]:
+                        letters_accuracy.append(correct / nb_of_letters)
+                        correct = 0
+                        nb_of_letters = 0
+
+            alphabet = list(string.ascii_lowercase)
+            pyplot.bar(alphabet, letters_accuracy)
+            pyplot.title("Dokładność rozpoznania liter dla zbioru " + dir_name)
+            pyplot.savefig(dir_name + "_letters_accuracy_plot.png")
 
         else:
             correct = 0
