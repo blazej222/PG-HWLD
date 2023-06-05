@@ -4,6 +4,8 @@ from scipy import ndimage
 import cv2
 import os
 
+#TODO:Implement multi processing
+
 
 def image_rotate(imageFile, angle):
     imageFile = ndimage.rotate(imageFile, angle, mode='constant', cval=255, reshape=False)

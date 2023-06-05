@@ -70,8 +70,9 @@ def transformAll(location, destination, removeOriginals=False, denoise=True):
 def main():
     location = "../../resources/datasets/augmented"
     destination = "../../resources/datasets/transformed"
+    #TODO: Append transformed suffix?
 
-    destination = "../../resources/datasets/transformed/ultimate_dataset_3000"
+    #destination = "../../resources/datasets/transformed/ultimate_dataset_3000"
 
     transformAll(location, destination)
     # transformAll("../../resources/uploaded-images", "../../resources/uploaded-images", removeOriginals=False)
