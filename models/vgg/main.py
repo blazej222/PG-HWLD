@@ -18,6 +18,8 @@ import matplotlib.pyplot as plt
 import string
 import PIL.ImageOps
 
+#TODO: Add saving network status
+
 class CustomDataset(VisionDataset):
     def __init__(self, root, transform=None, train=True):
         super(CustomDataset, self).__init__(root, transform=transform)
