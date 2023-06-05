@@ -1,101 +1,164 @@
 import os
+import string
 from tkinter import Image
 from PIL import Image
 import numpy as np
+from matplotlib import pyplot
 
 
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
 
+def relu(x):
+    return np.maximum(0, x)
 
-def sigmoid_derivative(x):
-    return x * (1 - x)
+
+def softmax(values):
+    exp_values = np.exp(values)
+    exp_values_sum = np.sum(exp_values)
+    return exp_values / exp_values_sum
 
 
 class FNN:
     def __init__(self):
-        self.bias1 = None
-        self.weights1 = None
-        self.bias2 = None
-        self.weights2 = None
-        self.weights3 = None
-        self.bias3 = None
-        self.bias4 = None
-        self.weights4 = None
+        self.b1 = None
+        self.w1 = None
+        self.b2 = None
+        self.w2 = None
+        self.w3 = None
+        self.b3 = None
         self.error = None
-        self.epochs = 2752
-        self.hidden1_output = None
-        self.hidden2_output = None
-        self.hidden3_output = None
-        self.hidden4_output = None
+        self.epochs = 7000
+        self.h1_output = None
+        self.h2_output = None
         self.predicted_output = None
-        self.trainLabels = []
-        self.testLabels = []
-        self.trainSet = []
-        self.testSet = []
+        self.train_labels = []
+        self.test_labels = []
+        self.train_set = []
+        self.test_set = []
         self.current_set = None
-        self.learning_rate = 0.0001
+        self.learning_rate = 0.00001
+        self.accuracy_arr = []
+        self.epoch_arr = []
+        self.loss = []
 
     def initialize_parameters(self):
-        input_size = self.trainSet.shape[1]
-        hidden1_size = 2500
-        hidden2_size = 1000
-        hidden3_size = 600
+        if len(self.train_labels) <= 10000:
+            self.learning_rate = 0.00001
+        elif 10000 < len(self.train_labels) <= 100000:
+            self.learning_rate = 0.000001
+        else:
+            self.learning_rate = 0.0000001
+
+        input_size = self.train_set.shape[1]
+        h1_size = 128
+        h2_size = 64
         output_size = 26
 
-        self.weights1 = np.random.randn(input_size, hidden1_size)
-        self.bias1 = np.zeros(hidden1_size)
-        self.weights2 = np.random.randn(hidden1_size, hidden2_size)
-        self.bias2 = np.zeros(hidden2_size)
-        self.weights3 = np.random.randn(hidden2_size, hidden3_size)
-        self.bias3 = np.zeros(hidden3_size)
-        self.weights4 = np.random.randn(hidden3_size, output_size)
-        self.bias4 = np.zeros(output_size)
+        self.w1 = np.random.randn(input_size, h1_size)
+        self.b1 = np.zeros(h1_size)
+        self.w2 = np.random.randn(h1_size, h2_size)
+        self.b2 = np.zeros(h2_size)
+        self.w3 = np.random.randn(h2_size, output_size)
+        self.b3 = np.zeros(output_size)
 
     def forward(self):
-        self.hidden1_output = sigmoid(np.dot(self.current_set, self.weights1) + self.bias1)
-        self.hidden2_output = sigmoid(np.dot(self.hidden1_output, self.weights2) + self.bias2)
-        self.hidden3_output = sigmoid(np.dot(self.hidden2_output, self.weights3) + self.bias3)
-        self.predicted_output = sigmoid(np.dot(self.hidden3_output, self.weights4) + self.bias4)
+        self.h1_output = sigmoid(np.dot(self.current_set, self.w1) + self.b1)
+        self.h2_output = sigmoid(np.dot(self.h1_output, self.w2) + self.b2)
+        self.predicted_output = sigmoid(np.dot(self.h2_output, self.w3) + self.b3)
 
     def backward(self):
-        output_error = self.trainLabels - self.predicted_output
-        self.weights4 += self.learning_rate * np.dot(self.hidden3_output.T, output_error)
-        self.bias4 += self.learning_rate * np.sum(output_error, axis=0)
+        output_error = self.train_labels - self.predicted_output
+        self.w3 += self.learning_rate * np.dot(self.h2_output.T, output_error)
+        self.b3 += self.learning_rate * np.sum(output_error, axis=0)
 
-        hidden3_error = np.dot(output_error, self.weights4.T)
-        self.weights3 += self.learning_rate * np.dot(self.hidden2_output.T, hidden3_error)
-        self.bias3 += self.learning_rate * np.sum(hidden3_error, axis=0)
+        h2_error = np.dot(output_error, self.w3.T)
+        self.w2 += self.learning_rate * np.dot(self.h1_output.T, h2_error)
+        self.b2 += self.learning_rate * np.sum(h2_error, axis=0)
 
-        hidden2_error = np.dot(hidden3_error, self.weights3.T)
-        self.weights2 += self.learning_rate * np.dot(self.hidden1_output.T, hidden2_error)
-        self.bias2 += self.learning_rate * np.sum(hidden2_error, axis=0)
+        h1_error = np.dot(h2_error, self.w2.T)
+        self.w1 += self.learning_rate * np.dot(self.train_set.T, h1_error)
+        self.b1 += self.learning_rate * np.sum(h1_error, axis=0)
 
-        hidden1_error = np.dot(hidden2_error, self.weights2.T)
-        self.weights1 += self.learning_rate * np.dot(self.trainSet.T, hidden1_error)
-        self.bias1 += self.learning_rate * np.sum(hidden1_error, axis=0)
+        self.cross_entropy()
 
     def train(self):
-        self.current_set = self.trainSet
+        self.current_set = self.train_set
         for epoch in range(self.epochs):
             self.forward()
             self.backward()
-            print(epoch)
-            if epoch % 50 == 0:
-                self.predict()
+            if epoch % 100 == 0:
+                print("Epoch: ", epoch)
+                self.predict(epoch, None)
 
-    def predict(self):
-        accuracy = 0
-        self.current_set = self.testSet
-        self.forward()
-        predicted_labels = np.argmax(self.predicted_output, axis=1)
-        for i in range(len(predicted_labels)):
-            if predicted_labels[i] == self.testLabels[i]:
-                accuracy += 1
-        print("Accuracy: ", accuracy / len(predicted_labels))
+    def cross_entropy(self):
+        if np.array_equal(self.current_set, self.train_set):
+            labels = self.train_labels
+        else:
+            labels = self.test_labels
 
-        # to usunac potem
-        self.current_set = self.trainSet
+        softmax(self.predicted_output)
+        loss = 0
+        for i in range(len(self.predicted_output)):
+            loss += -1 * labels[i] * np.log(self.predicted_output[i])
+        total_loss = loss.sum()
+        self.loss.append(total_loss)
+
+    def predict(self, epoch, dir_name):
+        if epoch == -1:
+            # print accuracy
+            self.current_set = self.test_set
+            self.forward()
+            pyplot.plot(self.epoch_arr, self.accuracy_arr)
+            pyplot.ylabel("Dokładność")
+            pyplot.xlabel("Epoki")
+            pyplot.grid()
+            pyplot.title("Dokładność rozpoznania liter w zależności od epoki dla zbioru " + dir_name)
+            pyplot.savefig(dir_name + "_accuracy_plot.png")
+            pyplot.close()
+            # print loss
+            pyplot.plot(self.loss)
+            pyplot.ylabel("Strata")
+            pyplot.xlabel("Epoki")
+            pyplot.grid()
+            pyplot.title("Funkcja straty w zależności od epoki dla zbioru " + dir_name)
+            pyplot.savefig(dir_name + "_loss_plot.png")
+            pyplot.close()
+            # print accuracy for every letter
+            letters_accuracy = []
+            predicted_labels = np.argmax(self.predicted_output, axis=1)
+            correct = 0
+            nb_of_letters = 0
+            for i in range(len(predicted_labels)):
+                nb_of_letters += 1
+                if predicted_labels[i] == self.test_labels[i]:
+                    correct += 1
+                if i == (len(predicted_labels) - 1):
+                    letters_accuracy.append(correct / nb_of_letters)
+                else:
+                    if self.test_labels[i] != self.test_labels[i + 1]:
+                        letters_accuracy.append(correct / nb_of_letters)
+                        correct = 0
+                        nb_of_letters = 0
+
+            alphabet = list(string.ascii_lowercase)
+            pyplot.bar(alphabet, letters_accuracy)
+            pyplot.title("Dokładność rozpoznania liter dla zbioru " + dir_name)
+            pyplot.savefig(dir_name + "_letters_accuracy_plot.png")
+
+        else:
+            correct = 0
+            self.current_set = self.test_set
+            self.forward()
+            predicted_labels = np.argmax(self.predicted_output, axis=1)
+            for i in range(len(predicted_labels)):
+                if predicted_labels[i] == self.test_labels[i]:
+                    correct += 1
+            accuracy = correct/len(predicted_labels)
+            print("Accuracy: ", accuracy)
+            self.accuracy_arr.append(accuracy)
+            self.epoch_arr.append(epoch)
+            self.current_set = self.train_set
 
     def load_sets(self, directory, is_train_set):
         imagesArr = []
@@ -114,16 +177,16 @@ class FNN:
                 labels.append(label)
 
         if is_train_set:
-            self.trainSet = np.array(imagesArr)
-            self.trainLabels = np.array(labels)
+            self.train_set = np.array(imagesArr)
+            self.train_labels = np.array(labels)
             self.initialize_parameters()
             self.prepare_train_labels()
         else:
-            self.testSet = np.array(imagesArr)
-            self.testLabels = np.array(labels)
+            self.test_set = np.array(imagesArr)
+            self.test_labels = np.array(labels)
 
     def prepare_train_labels(self):
-        encoded_labels = np.zeros((len(self.trainLabels), 26))
-        for i, label in enumerate(self.trainLabels):
+        encoded_labels = np.zeros((len(self.train_labels), 26))
+        for i, label in enumerate(self.train_labels):
             encoded_labels[i, label] = 1
-        self.trainLabels = encoded_labels
+        self.train_labels = encoded_labels
