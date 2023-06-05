@@ -3,6 +3,7 @@ import os
 
 import keras
 import numpy as np
+import matplotlib.pyplot as plt
 from keras import Sequential
 from keras.layers import Dense, Flatten, MaxPooling2D, Conv2D, Dropout, BatchNormalization
 from keras.preprocessing.image import ImageDataGenerator
@@ -144,13 +145,15 @@ class Network:
         self.cnn.save_weights("cnn.h5")
 
     def test(self, fileName):
-        img = load_img(fileName)
+        img = load_img(fileName, color_mode='grayscale')
+        img.show()
         img = img_to_array(img)
         img = np.expand_dims(img, axis=0)
         img = np.vstack([img])
         predictedLetter = self.cnn.predict(img, verbose=0)
         predictedLetter = find_letter(predictedLetter)
         print("Predicted letter: " + predictedLetter)
+
 
     #  TODO: Check if there's a cleaner way to implement this
     def test_catalog(self, catalog, label=None, doPrint=False, test_by_folder=False, echo=True):

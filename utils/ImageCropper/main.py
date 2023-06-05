@@ -73,7 +73,7 @@ def crop_black_letters_file(address,file,margin,threshold,destination,location):
     cv2.imwrite(os.path.join(destination + address.replace(location, ''), file), cropped_image)
 
 
-def crop_black_letters_catalog(location, destination, margin, threshold):
+def crop_black_letters_catalog(location, destination, margin=0, threshold=100):
     if not os.path.exists(destination):
         os.makedirs(destination)
 

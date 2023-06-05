@@ -1,16 +1,14 @@
+import os
+import shutil
+import utils.ImageCropper.main as ImageCropper
+import utils.DataAugmenter.main as DataAugmenter
+import utils.ImageTransformer.main as ImageTransformer
 from neural_network import *
 
 train_images_path = "../../resources/datasets/dataset-EMNIST/train-images"
 # train_images_path = "../../resources/datasets/augmented/dataset-multi-person-augmented"
 test_images_path = "../../resources/datasets/dataset-EMNIST/test-images"
 test_labels_path = "../../resources/datasets/dataset-EMNIST/test-labels.txt"
-
-
-# train_images_path = "../../resources/datasets/divided/dataset-multi-person-cropped-10-augmented/train-images"
-# test_images_path = "../../resources/datasets/divided/dataset-multi-person-cropped-10-augmented/test-images"
-
-# train_images_path = "../../resources/datasets/divided/ultimate_dataset_3000/train-images"
-# test_images_path = "../../resources/datasets/divided/ultimate_dataset_3000/test-images"
 
 def prediction_loop():
     print(f"Catalog test for EMNIST/test-images")
@@ -75,7 +73,23 @@ if __name__ == '__main__':
     network.training_testing_set(train_catalog=train_images_path, test_catalog=test_images_path)
     network.train()
 
-    prediction_loop()
+    margin = 0
+    color_threshold = 100
+    rotation_angle = 0
+
+    ImageCropper.crop_black_letters_catalog("../../resources/uploaded-images", "../../resources/cropped-images",
+                                            margin, color_threshold)
+    DataAugmenter.rotateAll("../../resources/cropped-images", "../../resources/rotated-images", rotation_angle)
+    ImageTransformer.transformAll("../../resources/rotated-images/", "../../resources/transformed-images")
+
+    for file in os.listdir("../../resources/transformed-images"):
+        network.test(os.path.join("../../resources/transformed-images", file))
+
+    shutil.rmtree("../../resources/cropped-images")
+    shutil.rmtree("../../resources/rotated-images")
+    shutil.rmtree("../../resources/transformed-images")
+
+    # prediction_loop()
 
     # for i in range(0, 26):
     #     print(f"Testing for {chr(97 + i)}:", end=" ")
