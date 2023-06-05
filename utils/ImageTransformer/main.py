@@ -68,12 +68,12 @@ def transformAll(location, destination, removeOriginals=False, denoise=True):
 
 
 def main():
-    # location = "../../resources/datasets/augmented"
-    # destination = "../../resources/datasets/transformed"
 
-    location = "../../resources/datasets/augmented/dataset-multi-person-cropped-20-augmented"
-    destination = "../../resources/datasets/transformed/dataset-multi-person-cropped-20-augmented"
-    transformAll(location, destination)
+    location = "../../resources/datasets/augmented"
+    destination = "../../resources/datasets/transformed"
+    #TODO: Append transformed suffix?
+
+    #destination = "../../resources/datasets/transformed/ultimate_dataset_3000"
 
     location = "../../resources/datasets/augmented/dataset-single-person-cropped-20-augmented"
     destination = "../../resources/datasets/transformed/dataset-single-person-cropped-20-augmented"
