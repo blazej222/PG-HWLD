@@ -93,7 +93,6 @@ def crop_black_letters_catalog(location, destination, margin, threshold):
 
 
 def main():
-
     margin = 50
     start = time()
 
@@ -112,7 +111,6 @@ def main():
 
 
     end = time()
-
     print(f"Finished in {end-start}")
 
 if __name__ == '__main__':
