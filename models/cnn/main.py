@@ -70,11 +70,18 @@ def prediction_loop():
 #  doesn't close the filestream properly before trying to perform tests, therefore doesn't load the model properly)
 if __name__ == '__main__':
     network = Network(None, None, None)
-    network.create_cnn()
+    network.create_simple_cnn()
+    # network.create_cnn()
     network.training_testing_set(train_catalog=train_images_path, test_catalog=test_images_path)
     network.train()
 
     prediction_loop()
+
+    # for i in range(0, 26):
+    #     print(f"Testing for {chr(97 + i)}:", end=" ")
+    #     network.test_catalog(
+    #         f"../../resources/datasets/divided/ultimate_dataset_3000/test-images/{chr(97 + i)}",
+    #         label=chr(97 + i), echo=False)
 
     # network.test_catalog(f"../../resources/datasets/transformed/dataset-single-person-cropped-10-augmented", test_by_folder=True)
     # network.test_catalog(f"../../resources/datasets/transformed/dataset-single-person-cropped-20", test_by_folder=True)

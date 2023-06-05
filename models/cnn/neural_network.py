@@ -133,7 +133,7 @@ class Network:
         # json does not exist
         self.cnn.fit(self.trainSet,
                      # steps_per_epoch=1950,
-                     epochs=5,
+                     epochs=4,
                      validation_data=self.testSet,
                      verbose=1
                      )
