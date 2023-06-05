@@ -83,6 +83,7 @@ def crop_black_letters_catalog(location, destination, margin, threshold):
             temp = destination + subdirectory
             if not os.path.exists(os.path.join(temp, directory)):
                 os.makedirs(os.path.join(temp, directory))
+
         pool = mp.Pool()
         pool.starmap_async(crop_black_letters_file,[(address,x,margin,threshold,destination,location) for x in files])
         pool.close()
@@ -95,17 +96,21 @@ def main():
     margin = 50
     start = time()
 
+    #TODO: Add cropped directory
+
     # TEST RUN
     # input_image = cv2.imread("../../resources/uploaded-images/z.png")
     # cv2.imwrite("../../resources/uploaded-images/z-cropped.png", img=crop_black_letter(input_image, margin, threshold=10))
+    # crop_black_letters_catalog("../../resources/uploaded-images", "../../resources/preprocessed-images", margin, threshold=100)
 
-    # crop_black_letters_catalog("../../resources/datasets/unpacked/dataset-multi-person",
-    #                            f"../../resources/datasets/unpacked/dataset-multi-person-cropped-{margin}", margin, threshold=100)
+    crop_black_letters_catalog("../../resources/datasets/unpacked/dataset-multi-person",
+                              f"../../resources/datasets/unpacked/dataset-multi-person-cropped-{margin}", margin, threshold=100)
     crop_black_letters_catalog("../../resources/datasets/unpacked/dataset-single-person",
-                               f"../../resources/datasets/unpacked/dataset-single-person-cropped-{margin}", margin, threshold=100)
+                              f"../../resources/datasets/unpacked/dataset-single-person-cropped-{margin}", margin, threshold=100)
+
+
 
     end = time()
-
     print(f"Finished in {end-start}")
 
 if __name__ == '__main__':
