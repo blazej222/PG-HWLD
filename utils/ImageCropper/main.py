@@ -95,6 +95,8 @@ def main():
     margin = 50
     start = time()
 
+    #TODO: Add cropped directory
+
     # TEST RUN
     # input_image = cv2.imread("../../resources/uploaded-images/z.png")
     # cv2.imwrite("../../resources/uploaded-images/z-cropped.png", img=crop_black_letter(input_image, margin, threshold=10))
