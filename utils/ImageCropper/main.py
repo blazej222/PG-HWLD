@@ -3,7 +3,8 @@ import os
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-
+import multiprocessing as mp
+from time import time
 
 def crop_black_letter(image, margin, threshold):
     # Invert the image (black letter on white background)
@@ -66,6 +67,11 @@ def crop_black_letter(image, margin, threshold):
 
     return cropped
 
+def crop_black_letters_file(address,file,margin,threshold,destination,location):
+    image = cv2.imread(os.path.join(address, file))
+    cropped_image = crop_black_letter(image, margin, threshold)
+    cv2.imwrite(os.path.join(destination + address.replace(location, ''), file), cropped_image)
+
 
 def crop_black_letters_catalog(location, destination, margin, threshold):
     if not os.path.exists(destination):
@@ -78,17 +84,20 @@ def crop_black_letters_catalog(location, destination, margin, threshold):
             if not os.path.exists(os.path.join(temp, directory)):
                 os.makedirs(os.path.join(temp, directory))
 
-        for file in files:
-            if file.endswith(".jpg") or file.endswith(".png") or file.endswith(".bmp"):
-                image = cv2.imread(os.path.join(address, file))
-                cropped_image = crop_black_letter(image, margin, threshold)
-                cv2.imwrite(os.path.join(destination + address.replace(location, ''), file), cropped_image)
+        pool = mp.Pool()
+        pool.starmap_async(crop_black_letters_file,[(address,x,margin,threshold,destination,location) for x in files])
+        pool.close()
+        pool.join()
 
     print(f"Cropping finished for catalog {location}")
 
 
 def main():
-    margin = 30
+
+    margin = 50
+    start = time()
+
+    #TODO: Add cropped directory
 
     # TEST RUN
     # input_image = cv2.imread("../../resources/uploaded-images/z.png")
@@ -102,6 +111,9 @@ def main():
 
 
 
+    end = time()
+
+    print(f"Finished in {end-start}")
 
 if __name__ == '__main__':
     main()
