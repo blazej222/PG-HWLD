@@ -60,18 +60,20 @@ class CustomDataset(VisionDataset):
     def __len__(self):
         return len(self.file_list)
 
-num_epochs = 20
+num_epochs = 200
 batch_size_train = 100
 batch_size_test = 1000
 learning_rate = 0.005
 momentum = 0.5
 log_interval = 500
 use_custom_train_loader = 0
-use_custom_test_loader = True
+use_custom_test_loader = 0
 reverse_test_images_colors = 1
 debug_print = True
-custom_loader_test_path = 'C:/Users/Blazej/Desktop/tmp/dataset-multi-person-cropped-20'
-custom_loader_train_path = 'C:/Users/Blazej/Desktop/tmp/dataset-EMNIST/train-images'
+custom_loader_test_path = '../../resources/datasets/dataset-multi-person-cropped-20'
+custom_loader_train_path = '../../resources/datasets/dataset-EMNIST/train-images'
+emnist_train_path = '../../resources/datasets/archives/emnist_download/train'
+emnist_test_path = '../../resources/datasets/archives/emnist_download/test'
 #../../resources/datasets/transformed/dataset-multi-person
 #C:/Users/Blazej/Desktop/tmp/dataset-EMNIST/test-images
 
@@ -96,11 +98,11 @@ if use_custom_train_loader:
 
 else:
     train_loader = torch.utils.data.DataLoader(
-        torchvision.datasets.EMNIST('../../resources/datasets/archives/emnist_download/train', split='letters',
+        torchvision.datasets.EMNIST(emnist_train_path, split='letters',
                                     train=True, download=True,
                                     transform=torchvision.transforms.Compose([
-                                        #torchvision.transforms.RandomPerspective(),
-                                        torchvision.transforms.RandomRotation(15, fill=(0,)),
+                                        torchvision.transforms.RandomPerspective(),
+                                        torchvision.transforms.RandomRotation(10, fill=(0,)),
                                         torchvision.transforms.ToTensor(),
                                         torchvision.transforms.Normalize(
                                             (0.1307,), (0.3081,))
@@ -120,7 +122,7 @@ if use_custom_test_loader:
 
 else:
     test_loader = torch.utils.data.DataLoader(
-        torchvision.datasets.EMNIST('../../resources/datasets/archives/emnist_download/test', split='letters',
+        torchvision.datasets.EMNIST(emnist_test_path, split='letters',
                                     train=False, download=True,
                                     transform=torchvision.transforms.Compose([
                                         torchvision.transforms.ToTensor(),
@@ -421,25 +423,25 @@ for epoch in range(num_epochs):
             total1 += labels.size(0)
             correct1 += (predicted == labels).sum().item()
 
-            # Update letter accuracy statistics
-            for i in range(len(labels)):
-                label = labels[i].item()
-                letter = chr(label + 96)
-                letter_accuracy1[letter]['total'] += 1
-                if predicted[i] == label:
-                    letter_accuracy1[letter]['correct'] += 1
-            
+            # # Update letter accuracy statistics
+            # for i in range(len(labels)):
+            #     label = labels[i].item()
+            #     letter = chr(label + 96)
+            #     letter_accuracy1[letter]['total'] += 1
+            #     if predicted[i] == label:
+            #         letter_accuracy1[letter]['correct'] += 1
+            #
             outputs = model2(images)
             _, predicted = torch.max(outputs.data, 1)
             total2 += labels.size(0)
             correct2 += (predicted == labels).sum().item()
-
-            for i in range(len(labels)):
-                label = labels[i].item()
-                letter = chr(label + 96)
-                letter_accuracy2[letter]['total'] += 1
-                if predicted[i] == label:
-                    letter_accuracy2[letter]['correct'] += 1
+            #
+            # for i in range(len(labels)):
+            #     label = labels[i].item()
+            #     letter = chr(label + 96)
+            #     letter_accuracy2[letter]['total'] += 1
+            #     if predicted[i] == label:
+            #         letter_accuracy2[letter]['correct'] += 1
     
         
         if best_accuracy1>= correct1 / total1:
@@ -462,16 +464,16 @@ for epoch in range(num_epochs):
             net_opt2 = model2
             print('Test Accuracy of SpinalNet: {} % (improvement)'.format(100 * correct2 / total2))
 
-    # Print letter accuracy statistics
-    print('Letter Accuracy for NN:')
-    for letter, accuracy in letter_accuracy1.items():
-        accuracy_percentage = accuracy['correct'] / accuracy['total'] * 100
-        print('{}: {} %'.format(letter, accuracy_percentage))
-
-    print('Letter Accuracy for SpinalNet:')
-    for letter, accuracy in letter_accuracy2.items():
-        accuracy_percentage = accuracy['correct'] / accuracy['total'] * 100
-        print('{}: {} %'.format(letter, accuracy_percentage))
+    # # Print letter accuracy statistics
+    # print('Letter Accuracy for NN:')
+    # for letter, accuracy in letter_accuracy1.items():
+    #     accuracy_percentage = accuracy['correct'] / accuracy['total'] * 100
+    #     print('{}: {} %'.format(letter, accuracy_percentage))
+    #
+    # print('Letter Accuracy for SpinalNet:')
+    # for letter, accuracy in letter_accuracy2.items():
+    #     accuracy_percentage = accuracy['correct'] / accuracy['total'] * 100
+    #     print('{}: {} %'.format(letter, accuracy_percentage))
 
         model1.train()
         model2.train()
