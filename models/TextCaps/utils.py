@@ -1,7 +1,7 @@
 import numpy as np
 import math
 
-dataset_load_path = "../../resources/datasets/dataset-EMNIST-mat/emnist-balanced.mat"
+dataset_load_path = "../../resources/datasets/dataset-EMNIST-mat/emnist-letters.mat"
 
 def combine_images(generated_images, height=None, width=None):
     num = generated_images.shape[0]
@@ -29,16 +29,20 @@ def load_emnist_balanced(cnt):
     import numpy as np
     emnist = spio.loadmat(dataset_load_path)
     
-    classes = 47
+    classes = 26
     cnt = cnt
     lim_train = cnt*classes
     
     x_train = emnist["dataset"][0][0][0][0][0][0]
     x_train = x_train.astype(np.float32)
     y_train = emnist["dataset"][0][0][0][0][0][1]
+    if y_train.min() == 1:
+        y_train -= 1
     x_test = emnist["dataset"][0][0][1][0][0][0]
     x_test = x_test.astype(np.float32)
     y_test = emnist["dataset"][0][0][1][0][0][1]
+    if y_test.min() == 1:
+        y_test -= 1
 
     x_train = x_train.reshape(x_train.shape[0], 28, 28, 1, order="A").astype('float32') / 255.
     x_test = x_test.reshape(x_test.shape[0], 28, 28, 1, order="A").astype('float32') / 255.

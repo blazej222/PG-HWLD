@@ -417,7 +417,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="TextCaps")
     parser.add_argument('--epochs', default=60, type=int)
     parser.add_argument('--verbose', default=False, type=bool)
-    parser.add_argument('--cnt', default=200, type=int)
+    parser.add_argument('--cnt', default=4800, type=int) #4800 for whole set, 200 for limited
     parser.add_argument('-n','--num_cls', default=47, type=int, help="Iterations")
     parser.add_argument('--batch_size', default=32, type=int)
     parser.add_argument('--samples_to_generate', default=10, type=int)
