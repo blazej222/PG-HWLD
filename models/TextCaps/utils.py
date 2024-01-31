@@ -1,7 +1,8 @@
 import numpy as np
 import math
 
-dataset_load_path = "../../resources/datasets/dataset-EMNIST-mat/emnist-letters.mat"
+#dataset_load_path = "../../resources/datasets/dataset-EMNIST-mat/emnist-letters.mat"
+dataset_load_path = "../../resources/datasets/packed/dataset-EMNIST/ouremnist.mat"
 
 def combine_images(generated_images, height=None, width=None):
     num = generated_images.shape[0]
