@@ -35,5 +35,11 @@ to install all requirements.
 This repository contains project run configurations for JetBrains Pycharm IDE.
 
 ## Description of utilities
-Work in progress.
+
+### DataSetPacker 
+DataSetPacker provides an ability to pack the dataset from by-class directory format to `.mat`.
+
+### DirectorySplitter
+DirectorySplitter splits a dataset into `train` and `test` directories by moving files to appropriate folders, respecting `split_ratio`.
+ 
 

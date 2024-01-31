@@ -1,7 +1,9 @@
 import numpy as np
 import os
 from PIL import Image,ImageOps
+from matplotlib import pyplot as plt
 from scipy import io as spio
+import matplotlib.pyplot as plt
 import multiprocessing as mp
 
 dataset_directory = "../../resources/datasets/dataset-EMNIST"
@@ -18,7 +20,7 @@ def load_directory(address,directory):
         tmp = Image.open(os.path.join(address,directory,file))
         if reverse_colors:
             tmp = ImageOps.invert(tmp)
-        tmp = np.array(tmp, order='F').reshape(-1)
+        tmp = np.array(tmp).reshape(-1,order='F')
         tmp = tmp.tolist()
         images.append(tmp)
     return [images,ord(directory)-97]
@@ -64,7 +66,7 @@ third_selector_choice_three = np.array(maps, dtype="uint8")
 
 tpl = (third_selector_choice_one,third_selector_choice_two,third_selector_choice_three)
 lst = [tpl]
-mainarray = np.array([lst], dtype=[("train","O"),("test","O"),("map","O")]) # TODO:CORRECT DTYPE
+mainarray = np.array([lst], dtype=[("train","O"),("test","O"),("mapping","O")])
 #print(mainarray)
 
 data_to_save = {"dataset": mainarray}
