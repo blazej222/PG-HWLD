@@ -1,8 +1,8 @@
 import numpy as np
 import math
 
-#dataset_load_path = "../../resources/datasets/dataset-EMNIST-mat/emnist-letters.mat"
-dataset_load_path = "../../resources/datasets/packed/dataset-EMNIST/ouremnist.mat"
+train_load_path = "../../resources/datasets/dataset-EMNIST-mat/emnist-letters.mat"
+test_load_path = "../../resources/datasets/packed/dataset-EMNIST/ouremnist.mat"
 
 def combine_images(generated_images, height=None, width=None):
     num = generated_images.shape[0]
@@ -28,28 +28,54 @@ def load_emnist_balanced(cnt):
     from scipy import io as spio
     from keras.utils import to_categorical
     import numpy as np
-    emnist = spio.loadmat(dataset_load_path)
+    import matplotlib.pyplot as plt
+    train_file = spio.loadmat(train_load_path)
+    test_file = spio.loadmat(test_load_path)
     
     classes = 26
     cnt = cnt
     lim_train = cnt*classes
     
-    x_train = emnist["dataset"][0][0][0][0][0][0]
+    x_train = train_file["dataset"][0][0][0][0][0][0]
     x_train = x_train.astype(np.float32)
-    y_train = emnist["dataset"][0][0][0][0][0][1]
+    y_train = train_file["dataset"][0][0][0][0][0][1]
     if y_train.min() == 1:
         y_train -= 1
-    x_test = emnist["dataset"][0][0][1][0][0][0]
+    x_test = test_file["dataset"][0][0][1][0][0][0]
     x_test = x_test.astype(np.float32)
-    y_test = emnist["dataset"][0][0][1][0][0][1]
+    y_test = test_file["dataset"][0][0][1][0][0][1]
     if y_test.min() == 1:
         y_test -= 1
 
+    x_train_test = train_file["dataset"][0][0][1][0][0][0]
+    x_train_test = x_train_test.astype(np.float32)
+    y_train_test = train_file["dataset"][0][0][1][0][0][1]
+    if y_train_test.min() == 1:
+        y_train_test -= 1
+
+    # SHOW FIRST LETTER OF EACH DATASET
+    # train_sample = np.array(train_file['dataset'][0][0][0][0][0][0][0]).reshape(28,28)
+    # test_sample = np.array(test_file['dataset'][0][0][0][0][0][0][0]).reshape(28,28)
+    # train_label = train_file['dataset'][0][0][0][0][0][1][0]
+    # test_label = test_file['dataset'][0][0][0][0][0][1][0]
+    #
+    # fig, axs = plt.subplots(1, 2, figsize=(10, 5))
+    # axs[0].imshow(train_sample, cmap='gray')
+    # axs[0].set_title(train_label[0])
+    # axs[1].imshow(test_sample, cmap='gray')
+    # axs[1].set_title(test_label[0])
+    # plt.show()
+    # input("Press any key to continue...")
+
+    #-------------------------------------------------
+
     x_train = x_train.reshape(x_train.shape[0], 28, 28, 1, order="A").astype('float32') / 255.
     x_test = x_test.reshape(x_test.shape[0], 28, 28, 1, order="A").astype('float32') / 255.
+    x_train_test = x_train_test.reshape(x_train_test.shape[0],28,28,1, order="A").astype('float32') / 255
  
     y_train = (y_train.astype('float32'))
-    y_test = to_categorical(y_test.astype('float32'))   
+    y_test = to_categorical(y_test.astype('float32'))
+    y_train_test = to_categorical(y_train_test.astype('float32'))
     
     #Append equal number of training samples from each class to x_train and y_train
     x_tr = []
@@ -69,4 +95,5 @@ def load_emnist_balanced(cnt):
     y_tr = to_categorical(y_tr.astype('float32'))
     
     print(x_tr.shape,y_tr.shape,x_test.shape,y_test.shape)
-    return (x_tr, y_tr), (x_test, y_test)
+    return (x_tr, y_tr), (x_test, y_test), (x_train_test, y_train_test)
+    #return (x_tr, y_tr), (x_test, y_test), (x_test, y_test)
