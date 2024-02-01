@@ -436,6 +436,8 @@ if __name__ == "__main__":
                         help="Generate new data with pre-trained model")
     parser.add_argument('-w', '--weights', default=None,
                         help="The path of the saved weights. Should be specified when testing")
+    parser.add_argument('-t', '--test', action='store_true',
+                        help="Whether we should test the model without training. Weights must be specified.")
     args = parser.parse_args()
     print(args)
 
@@ -464,9 +466,14 @@ if __name__ == "__main__":
     
     if args.weights is not None:
         model.load_weights(args.weights)
-    if not args.data_generate:      
-        train(model=model, data=((x_train, y_train), (x_train_test, y_train_test)), args=args)
-        test(model=eval_model, data=(x_test, y_test), args=args)
+    if args.test:
+        if args.weights is None:
+            print('No weights are provided. You need to train a model first.')
+        else:
+            test(model=eval_model, data=(x_test, y_test), args=args)
+    elif not args.data_generate:
+            train(model=model, data=((x_train, y_train), (x_train_test, y_train_test)), args=args)
+            test(model=eval_model, data=(x_test, y_test), args=args)
         
     else:
         if args.weights is None:

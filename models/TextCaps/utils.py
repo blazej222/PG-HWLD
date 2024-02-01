@@ -2,7 +2,7 @@ import numpy as np
 import math
 
 train_load_path = "../../resources/datasets/dataset-EMNIST-mat/emnist-letters.mat"
-test_load_path = "../../resources/datasets/packed/dataset-EMNIST/ouremnist.mat"
+test_load_path = "../../resources/datasets/packed/dataset-multi-person-cropped-20/dataset-multi-person-cropped-20.mat"
 
 def combine_images(generated_images, height=None, width=None):
     num = generated_images.shape[0]

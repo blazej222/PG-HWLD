@@ -6,12 +6,12 @@ from scipy import io as spio
 import matplotlib.pyplot as plt
 import multiprocessing as mp
 
-dataset_directory = "../../resources/datasets/dataset-EMNIST"
-destination = "../../resources/datasets/packed/dataset-EMNIST"
+dataset_directory = "../../resources/datasets/divided/dataset-multi-person-cropped-20"
+destination = "../../resources/datasets/packed/dataset-multi-person-cropped-20"
 train_path = dataset_directory + "/train-images"
 test_path = dataset_directory + "/test-images"
 reverse_colors = True
-filename = "/ouremnist.mat"
+filename = "/dataset-multi-person-cropped-20.mat"
 
 def load_directory(address,directory):
     images = []
