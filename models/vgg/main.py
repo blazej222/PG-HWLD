@@ -74,6 +74,10 @@ custom_loader_test_path = '../../resources/datasets/dataset-multi-person-cropped
 custom_loader_train_path = '../../resources/datasets/dataset-EMNIST/train-images'
 emnist_train_path = '../../resources/datasets/archives/emnist_download/train'
 emnist_test_path = '../../resources/datasets/archives/emnist_download/test'
+saved_model_path = './saved_models/'
+model1_filename = 'model1.pth'
+model2_filename = 'model2.pth'
+test_only = False
 #../../resources/datasets/transformed/dataset-multi-person
 #C:/Users/Blazej/Desktop/tmp/dataset-EMNIST/test-images
 
@@ -351,6 +355,50 @@ def update_lr(optimizer, lr):
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
 
+def test_model(model1,model2):
+    print('Entering testing mode.')
+    model1.load_state_dict(torch.load(os.path.join(saved_model_path,model1_filename)))
+    model2.load_state_dict(torch.load(os.path.join(saved_model_path,model2_filename)))
+    model1.eval()
+    model2.eval()
+    with torch.no_grad():
+        correct1 = 0
+        total1 = 0
+        correct2 = 0
+        total2 = 0
+        for images, labels in test_loader:
+            images = images.to(device)
+            labels = labels.to(device)
+
+            outputs = model1(images)
+            _, predicted = torch.max(outputs.data, 1)
+            total1 += labels.size(0)
+            correct1 += (predicted == labels).sum().item()
+
+            # # Update letter accuracy statistics
+            # for i in range(len(labels)):
+            #     label = labels[i].item()
+            #     letter = chr(label + 96)
+            #     letter_accuracy1[letter]['total'] += 1
+            #     if predicted[i] == label:
+            #         letter_accuracy1[letter]['correct'] += 1
+            #
+            outputs = model2(images)
+            _, predicted = torch.max(outputs.data, 1)
+            total2 += labels.size(0)
+            correct2 += (predicted == labels).sum().item()
+            #
+            # for i in range(len(labels)):
+            #     label = labels[i].item()
+            #     letter = chr(label + 96)
+            #     letter_accuracy2[letter]['total'] += 1
+            #     if predicted[i] == label:
+            #         letter_accuracy2[letter]['correct'] += 1
+
+        print('Test Accuracy of NN: {} %'.format(100 * correct1 / total1))
+
+        print('Test Accuracy of SpinalNet: {} %'.format(100 * correct2 / total2))
+
 # Train the model
 total_step = len(train_loader)
 curr_lr1 = learning_rate
@@ -375,6 +423,15 @@ total_step = len(train_loader)
 
 best_accuracy1 = 0
 best_accuracy2 = 0
+
+if not os.path.exists(saved_model_path):
+    os.mkdir(saved_model_path)
+
+# Testing logic goes here
+if test_only:
+    test_model(model1,model2)
+    exit(0)
+
 for epoch in range(num_epochs):
     for i, (images, labels) in enumerate(train_loader):
         images = images.to(device)
@@ -453,6 +510,7 @@ for epoch in range(num_epochs):
             best_accuracy1 = correct1 / total1
             net_opt1 = model1
             print('Test Accuracy of NN: {} % (improvement)'.format(100 * correct1 / total1))
+            torch.save(model1.state_dict(), os.path.join(saved_model_path,'best_' + model1_filename))
             
         if best_accuracy2>= correct2 / total2:
             # curr_lr2 = learning_rate*np.asscalar(pow(np.random.rand(1),3))
@@ -463,6 +521,7 @@ for epoch in range(num_epochs):
             best_accuracy2 = correct2 / total2
             net_opt2 = model2
             print('Test Accuracy of SpinalNet: {} % (improvement)'.format(100 * correct2 / total2))
+            torch.save(model2.state_dict(), os.path.join(saved_model_path, 'best_' + model2_filename))
 
     # # Print letter accuracy statistics
     # print('Letter Accuracy for NN:')
@@ -477,3 +536,5 @@ for epoch in range(num_epochs):
 
         model1.train()
         model2.train()
+torch.save(model1.state_dict(),os.path.join(saved_model_path,model1_filename))
+torch.save(model2.state_dict(),os.path.join(saved_model_path,model2_filename))

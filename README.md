@@ -37,7 +37,7 @@ This repository contains project run configurations for JetBrains Pycharm IDE.
 ## Description of utilities
 
 ### DataSetPacker 
-DataSetPacker provides an ability to pack the dataset from by-class directory format to `.mat`.
+DataSetPacker provides an ability to pack the dataset from by-class directory format to `.mat` (used by TextCaps model).
 
 ### DirectorySplitter
 DirectorySplitter splits a dataset into `train` and `test` directories by moving files to appropriate folders, respecting `split_ratio`.
