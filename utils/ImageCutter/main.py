@@ -1,5 +1,7 @@
 import ntpath
 import os
+import datetime
+
 from PIL import Image
 
 
@@ -33,7 +35,8 @@ def cut_image(image_path, destination, crop_width, crop_height, left_margin, upp
             cropped_image = image.crop((left, upper, right, lower))
 
             # Save the cropped image
-            cropped_image.save(subdirectory + f"/{ntpath.basename(image_path)[0]}_{y * num_tiles_x + x + 1}_{hash(subdirectory)}.png")
+            cropped_image.save(
+                subdirectory + f"/{ntpath.basename(image_path)[0]}_{y * num_tiles_x + x + 1}_{hash(image_path + f'/{ntpath.basename(image_path)[0]}')}.png")
 
     print(f"Image division for {ntpath.basename(image_path)[0]} completed successfully.")
 
@@ -61,7 +64,8 @@ def main():
     cut_image_catalog(source_image_arrays_path_mp2, destination_images_path_mp, crop_width=196, crop_height=196,
                       left_margin=36, upper_margin=48, divisor=5, num_tiles_x=12, num_tiles_y=17)
 
-    # cut_image_catalog(source_image_arrays_path_sp, destination_images_path_sp, crop_width=196, crop_height=196, left_margin=36, upper_margin=48, divisor=5, num_tiles_x=12, num_tiles_y=17)
+    cut_image_catalog(source_image_arrays_path_sp, destination_images_path_sp, crop_width=196, crop_height=196,
+                      left_margin=36, upper_margin=48, divisor=5, num_tiles_x=12, num_tiles_y=17)
 
 
 if __name__ == '__main__':

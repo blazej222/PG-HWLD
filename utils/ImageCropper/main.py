@@ -7,7 +7,7 @@ import multiprocessing as mp
 from time import time
 
 def crop_black_letter(image, margin, threshold):
-    # Invert the image (black letter on white background)
+    # Invert the image (black on white to white on black)
     inverted = cv2.bitwise_not(image)
 
     # Convert the image to grayscale
@@ -15,6 +15,7 @@ def crop_black_letter(image, margin, threshold):
 
     # Threshold the image to get a binary mask
     _, thresholded = cv2.threshold(gray, threshold, 255, cv2.THRESH_BINARY)
+    cv2.imwrite("C:/Users/Pingwin/Desktop/tmp.png", thresholded)
 
     # Find the non-zero pixels in the thresholded image
     points = cv2.findNonZero(thresholded)
@@ -107,8 +108,6 @@ def main():
                               f"../../resources/datasets/unpacked/dataset-multi-person-cropped-{margin}", margin, threshold=100)
     crop_black_letters_catalog("../../resources/datasets/unpacked/dataset-single-person",
                               f"../../resources/datasets/unpacked/dataset-single-person-cropped-{margin}", margin, threshold=100)
-
-
 
     end = time()
     print(f"Finished in {end-start}")
