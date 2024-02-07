@@ -17,8 +17,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import string
 import PIL.ImageOps
-
-#TODO: Add saving network status
+import argparse
 
 class CustomDataset(VisionDataset):
     def __init__(self, root, transform=None, train=True):
@@ -60,26 +59,50 @@ class CustomDataset(VisionDataset):
     def __len__(self):
         return len(self.file_list)
 
+parser = argparse.ArgumentParser(description='VGG')
+parser.add_argument('--train_path', default=None,
+                    help="Path to the training dataset")
+parser.add_argument('--test_path', default=None,
+                    help="Path to the testing dataset")
+parser.add_argument('--test', action='store_true', default=False,
+                    help="Whether we should test the model without training. Weights must be specified.")
+parser.add_argument('--saved_model_path', default='./saved_models',
+                    help="Path to directory containing saved model weights. Weights from training will be saved there")
+parser.add_argument('--model1_filename', default='model1.pth',
+                    help="Weights filename of normal VGG")
+parser.add_argument('--model2_filename', default='model2.pth',
+                    help="Weights filename of VGG-Spinal")
+parser.add_argument('--verbose', action='store_true', default=False,
+                    help="Show additional debug information")
+parser.add_argument('--rotate_images', action='store_true', default=False,
+                    help="Rotate images from test dataset by 90 degrees left, then flip them vertically to match those from default emnist training set.")
+args = parser.parse_args()
+
 num_epochs = 200
 batch_size_train = 100
 batch_size_test = 1000
 learning_rate = 0.005
 momentum = 0.5
 log_interval = 500
-use_custom_train_loader = 0
-use_custom_test_loader = 0
-reverse_test_images_colors = 1
-debug_print = True
-custom_loader_test_path = '../../resources/datasets/dataset-multi-person-cropped-20'
-custom_loader_train_path = '../../resources/datasets/dataset-EMNIST/train-images'
+use_custom_train_loader = True
+use_custom_test_loader = True
+reverse_test_images_colors = 0  # Not used anymore
+
+debug_print = args.verbose
+custom_loader_test_path = args.test_path
+custom_loader_train_path = args.train_path
 emnist_train_path = '../../resources/datasets/archives/emnist_download/train'
 emnist_test_path = '../../resources/datasets/archives/emnist_download/test'
-saved_model_path = './saved_models/'
-model1_filename = 'model1.pth'
-model2_filename = 'model2.pth'
-test_only = False
-#../../resources/datasets/transformed/dataset-multi-person
-#C:/Users/Blazej/Desktop/tmp/dataset-EMNIST/test-images
+saved_model_path = args.saved_model_path
+model1_filename = args.model1_filename
+model2_filename = args.model2_filename
+test_only = args.test
+rotate_images = args.rotate_images
+
+if custom_loader_train_path is None:
+    use_custom_train_loader = False
+if custom_loader_test_path is None:
+    use_custom_test_loader = False
 
 test_dataset = []
 train_dataset = []
@@ -118,6 +141,8 @@ if use_custom_test_loader:
 
     test_dataset = CustomDataset(custom_loader_test_path,
                                  transform=torchvision.transforms.Compose([
+                                     torchvision.transforms.RandomRotation([90,90]),
+                                     torchvision.transforms.RandomVerticalFlip(1.0),
                                      torchvision.transforms.ToTensor(),
                                      torchvision.transforms.Normalize(
                                          (0.1307,), (0.3081,))
