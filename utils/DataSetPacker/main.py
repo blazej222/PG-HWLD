@@ -5,13 +5,39 @@ from matplotlib import pyplot as plt
 from scipy import io as spio
 import matplotlib.pyplot as plt
 import multiprocessing as mp
+import argparse
 
-dataset_directory = "../../resources/datasets/divided/dataset-multi-person-cropped-20"
-destination = "../../resources/datasets/packed/dataset-multi-person-cropped-20"
-train_path = dataset_directory + "/train-images"
-test_path = dataset_directory + "/test-images"
-reverse_colors = True
-filename = "/dataset-multi-person-cropped-20.mat"
+
+# source_dataset/
+# ├── train-images/
+# │   ├── a/
+# │   ├── b/
+# │   ├── c/
+# │   └── ...
+# └── test-images/
+#     ├── a/
+#     ├── b/
+#     ├── c/
+#     └── ...
+
+parser = argparse.ArgumentParser(description='Pack dataset into .mat format')
+parser.add_argument('--source', type=str, required=True,
+                    help='Dataset source directory')
+parser.add_argument('--destination', type=str, required=True,
+                    help='.Mat file destination directory')
+parser.add_argument('--reverse_colors', action='store_true', default=False,
+                    help='Change black to white and vice versa')
+parser.add_argument('--filename', type=str, default='packed_dataset.mat',
+                    help='Output filename')
+args = parser.parse_args()
+print(args)
+
+source = args.source
+destination = args.destination
+reverse_colors = args.reverse_colors
+output_filename = args.filename
+train_path = source + "/train-images"
+test_path = source + "/test-images"
 
 def load_directory(address,directory):
     images = []
@@ -40,8 +66,10 @@ x_train = []
 y_train = []
 x_test = []
 y_test = []
-
-load_classes(train_path,dirs,x_train,y_train)
+if len(dirs) != 0:
+    load_classes(train_path,dirs,x_train,y_train)
+else:
+    dirs = os.listdir(test_path)
 load_classes(test_path,dirs,x_test,y_test)
 
 
@@ -70,7 +98,7 @@ mainarray = np.array([lst], dtype=[("train","O"),("test","O"),("mapping","O")])
 #print(mainarray)
 
 data_to_save = {"dataset": mainarray}
-spio.savemat(destination + filename, data_to_save)
+spio.savemat(destination + output_filename, data_to_save)
 
 
     # pool = mp.Pool()

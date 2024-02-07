@@ -417,7 +417,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="TextCaps")
     parser.add_argument('--epochs', default=60, type=int)
     parser.add_argument('--verbose', default=False, type=bool)
-    parser.add_argument('--cnt', default=4800, type=int) #4800 for whole set, 200 for limited
+    parser.add_argument('--cnt', default=200, type=int)
     parser.add_argument('-n','--num_cls', default=47, type=int, help="Iterations")
     parser.add_argument('--batch_size', default=32, type=int)
     parser.add_argument('--samples_to_generate', default=10, type=int)
@@ -438,13 +438,17 @@ if __name__ == "__main__":
                         help="The path of the saved weights. Should be specified when testing")
     parser.add_argument('-t', '--test', action='store_true',
                         help="Whether we should test the model without training. Weights must be specified.")
+    parser.add_argument('--train_path', required=True,
+                        help="Path to the training dataset")
+    parser.add_argument('--test_path', required=True,
+                        help="Path to the testing dataset")
     args = parser.parse_args()
     print(args)
 
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
 
-    (x_train, y_train), (x_test, y_test), (x_train_test, y_train_test) = load_emnist_balanced(args.cnt)
+    (x_train, y_train), (x_test, y_test), (x_train_test, y_train_test) = load_emnist_balanced(args.cnt, args.train_path, args.test_path)
 
     model, eval_model = CapsNet(input_shape=x_train.shape[1:],
                                                   n_class=len(np.unique(np.argmax(y_train, 1))),

@@ -1,9 +1,6 @@
 import numpy as np
 import math
 
-train_load_path = "../../resources/datasets/dataset-EMNIST-mat/emnist-letters.mat"
-test_load_path = "../../resources/datasets/packed/dataset-multi-person-cropped-20/dataset-multi-person-cropped-20.mat"
-
 def combine_images(generated_images, height=None, width=None):
     num = generated_images.shape[0]
     if width is None and height is None:
@@ -24,7 +21,7 @@ def combine_images(generated_images, height=None, width=None):
             img[:, :, 0]
     return image
 
-def load_emnist_balanced(cnt):
+def load_emnist_balanced(cnt, train_load_path, test_load_path):
     from scipy import io as spio
     from keras.utils import to_categorical
     import numpy as np

@@ -1,6 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Tesseract" type="PythonConfigurationType" factoryName="Python">
-    <output_file path="$PROJECT_DIR$/models/pytesseract/stats.txt" is_save="true" />
+  <configuration default="false" name="DataSetPacker" type="PythonConfigurationType" factoryName="Python">
     <module name="PG-AI-Project" />
     <option name="ENV_FILES" value="" />
     <option name="INTERPRETER_OPTIONS" value="" />
@@ -10,13 +9,13 @@
     </envs>
     <option name="SDK_HOME" value="" />
     <option name="SDK_NAME" value="Python 3.11 (PG-AI-Project)" />
-    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/models/pytesseract" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils/DataSetPacker/" />
     <option name="IS_MODULE_SDK" value="false" />
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/models/pytesseract/main.py" />
-    <option name="PARAMETERS" value="" />
+    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/utils/DataSetPacker/main.py" />
+    <option name="PARAMETERS" value="--source ../../resources/datasets/dataset-processed --destination ../../resources/datasets/packed/dataset-processed --filename dataset-processed.mat" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />
