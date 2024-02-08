@@ -143,8 +143,6 @@ if use_custom_test_loader:
 
         test_dataset = CustomDataset(custom_loader_test_path,
                                      transform=torchvision.transforms.Compose([
-                                         torchvision.transforms.RandomRotation([90,90]), #apply rotation and flip due to default column-row ordering
-                                         torchvision.transforms.RandomVerticalFlip(1.0),
                                          torchvision.transforms.ToTensor(),
                                          torchvision.transforms.Normalize(
                                              (0.1307,), (0.3081,))
@@ -152,6 +150,8 @@ if use_custom_test_loader:
     else:
         test_dataset = CustomDataset(custom_loader_test_path,
                                      transform=torchvision.transforms.Compose([
+                                         torchvision.transforms.RandomRotation([90, 90]), # apply rotation and flip due to default column-row ordering
+                                         torchvision.transforms.RandomVerticalFlip(1.0),
                                          torchvision.transforms.ToTensor(),
                                          torchvision.transforms.Normalize(
                                              (0.1307,), (0.3081,))
