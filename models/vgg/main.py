@@ -79,7 +79,7 @@ parser.add_argument('--rotate_images', action='store_true', default=False,
 args = parser.parse_args()
 
 num_epochs = 200
-batch_size_train = 100
+batch_size_train = 100 # TODO: Try larger batch size
 batch_size_test = 1000
 learning_rate = 0.005
 momentum = 0.5
@@ -139,14 +139,23 @@ else:
 
 if use_custom_test_loader:
 
-    test_dataset = CustomDataset(custom_loader_test_path,
-                                 transform=torchvision.transforms.Compose([
-                                     torchvision.transforms.RandomRotation([90,90]),
-                                     torchvision.transforms.RandomVerticalFlip(1.0),
-                                     torchvision.transforms.ToTensor(),
-                                     torchvision.transforms.Normalize(
-                                         (0.1307,), (0.3081,))
-                                 ]), train=False)
+    if use_custom_train_loader:
+
+        test_dataset = CustomDataset(custom_loader_test_path,
+                                     transform=torchvision.transforms.Compose([
+                                         torchvision.transforms.ToTensor(),
+                                         torchvision.transforms.Normalize(
+                                             (0.1307,), (0.3081,))
+                                     ]), train=False)
+    else:
+        test_dataset = CustomDataset(custom_loader_test_path,
+                                     transform=torchvision.transforms.Compose([
+                                         torchvision.transforms.RandomRotation([90, 90]), # apply rotation and flip due to default column-row ordering
+                                         torchvision.transforms.RandomVerticalFlip(1.0),
+                                         torchvision.transforms.ToTensor(),
+                                         torchvision.transforms.Normalize(
+                                             (0.1307,), (0.3081,))
+                                     ]), train=False)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size_test, shuffle=True)
 
 else:
