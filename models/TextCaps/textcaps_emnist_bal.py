@@ -436,13 +436,19 @@ if __name__ == "__main__":
                         help="Generate new data with pre-trained model")
     parser.add_argument('-w', '--weights', default=None,
                         help="The path of the saved weights. Should be specified when testing")
+    parser.add_argument('-t', '--test', action='store_true',
+                        help="Whether we should test the model without training. Weights must be specified.")
+    parser.add_argument('--train_path', required=True,
+                        help="Path to the training dataset")
+    parser.add_argument('--test_path', required=True,
+                        help="Path to the testing dataset")
     args = parser.parse_args()
     print(args)
 
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
 
-    (x_train, y_train), (x_test, y_test) = load_emnist_balanced(args.cnt)
+    (x_train, y_train), (x_test, y_test), (x_train_test, y_train_test) = load_emnist_balanced(args.cnt, args.train_path, args.test_path)
 
     model, eval_model = CapsNet(input_shape=x_train.shape[1:],
                                                   n_class=len(np.unique(np.argmax(y_train, 1))),
@@ -464,9 +470,14 @@ if __name__ == "__main__":
     
     if args.weights is not None:
         model.load_weights(args.weights)
-    if not args.data_generate:      
-        train(model=model, data=((x_train, y_train), (x_test, y_test)), args=args)
-        test(model=eval_model, data=(x_test, y_test), args=args)
+    if args.test:
+        if args.weights is None:
+            print('No weights are provided. You need to train a model first.')
+        else:
+            test(model=eval_model, data=(x_test, y_test), args=args)
+    elif not args.data_generate:
+            train(model=model, data=((x_train, y_train), (x_train_test, y_train_test)), args=args)
+            test(model=eval_model, data=(x_test, y_test), args=args)
         
     else:
         if args.weights is None:

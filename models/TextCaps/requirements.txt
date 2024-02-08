@@ -1,12 +1,31 @@
-### Dependencies for TextCaps			  	###
-###                                             ###
-### To install, run:                            ###
-###      $ pip install -r requirements.txt      ###
-###                                             ###
-###################################################
-
-## Keras neural-network library ##
-keras
-
-## NumPy python library##
-numpy
+absl-py==1.4.0
+astor==0.8.1
+backports.weakref==1.0rc1
+bleach==1.5.0
+dataclasses==0.8
+gast==0.2.2
+google-pasta==0.2.0
+grpcio==1.48.2
+h5py==2.10.0
+html5lib==0.9999999
+importlib-metadata==4.8.3
+Keras==2.0.7
+Keras-Applications==1.0.8
+Keras-Preprocessing==1.1.2
+Markdown==3.3.7
+numpy==1.18.5
+#nvidia-pyindex==1.0.9
+opt-einsum==3.3.0
+Pillow==6.1.0
+protobuf==3.19.6
+PyYAML==6.0.1
+scipy==1.5.4
+six==1.16.0
+tensorboard==1.15.0
+tensorflow==1.2.1
+termcolor==1.1.0
+Theano==1.0.5
+typing_extensions==4.1.1
+Werkzeug==2.0.3
+wrapt==1.15.0
+zipp==3.6.0
