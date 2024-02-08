@@ -6,7 +6,6 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torchvision
-import torchvision.transforms as transforms
 import wavemix
 from PIL import Image
 from einops.layers.torch import Rearrange
@@ -19,7 +18,7 @@ from tqdm import tqdm
 # use GPU
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-num_classes = 62
+num_classes = 27
 emnist_train_path = '../../resources/datasets/archives'
 emnist_test_path = '../../resources/datasets/archives'
 use_custom_train_loader = False
@@ -34,10 +33,10 @@ class WaveMix(nn.Module):
             *,
             num_classes,
             depth,
-            mult=2,
-            ff_channel=16,
-            final_dim=16,
-            dropout=0.5,
+            mult,
+            ff_channel,
+            final_dim,
+            dropout,
     ):
         super().__init__()
 
@@ -145,13 +144,14 @@ if use_custom_train_loader:
 
     train_dataset = CustomDataset(custom_loader_train_path,
                                   transform=torchvision.transforms.Compose([
-                                      # torchvision.transforms.RandomPerspective(),
-                                      # torchvision.transforms.RandomRotation(10, fill=(0,)),
+                                      torchvision.transforms.RandomPerspective(),
+                                      torchvision.transforms.RandomRotation(10, fill=(0,)),
                                       torchvision.transforms.ToTensor(),
                                       torchvision.transforms.Normalize((0.1307,), (0.3081,))
                                   ]), train=True)
 
     print(f"Number of train classes: {len(train_dataset.classes)}")
+    print(train_dataset.classes)
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
@@ -167,6 +167,8 @@ else:
                                     ])),
         batch_size=batch_size, shuffle=True)
     train_dataset = train_loader.dataset
+    print(f"Number of train classes: {len(train_dataset.classes)}")
+    print(train_dataset.classes)
 
 if use_custom_test_loader:
 
@@ -179,6 +181,7 @@ if use_custom_test_loader:
                                  ]), train=False)
 
     print(f"Number of test classes: {len(test_dataset.classes)}")
+    print(test_dataset.classes)
 
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
 
@@ -192,9 +195,10 @@ else:
                                     ])),
         batch_size=batch_size, shuffle=True)
     test_dataset = test_loader.dataset
+    print(f"Number of test classes: {len(test_dataset.classes)}")
+    print(test_dataset.classes)
 
 # Loading the dataset from our own files
-
 
 # metrics
 top1_acc = Accuracy(task="multiclass", num_classes=num_classes).to(device)
@@ -264,8 +268,7 @@ while counter < 20:  # Counter sets the number of epochs of non improvement befo
             correct_5 += top5_acc(outputs, labels)
             c += 1
 
-    print(
-        f"Epoch : {epoch + 1} - Top 1: {correct_1 * 100 / c:.2f} - Top 5: {correct_5 * 100 / c:.2f} -  Train Time: {t1 - t0:.2f} - Test Time: {time.time() - t1:.2f}\n")
+    print(f"Epoch : {epoch + 1} - Top 1: {correct_1 * 100 / c:.2f} - Top 5: {correct_5 * 100 / c:.2f} -  Train Time: {t1 - t0:.2f} - Test Time: {time.time() - t1:.2f}\n")
 
     top1.append(correct_1 * 100 / c)
     top5.append(correct_5 * 100 / c)
@@ -323,8 +326,7 @@ while counter < 20:  # loop over the dataset multiple times
             correct_5 += top5_acc(outputs, labels)
             c += 1
 
-    print(
-        f"Epoch : {epoch + 1} - Top 1: {correct_1 * 100 / c:.2f} - Top 5: {correct_5 * 100 / c:.2f} -  Train Time: {t1 - t0:.2f} - Test Time: {time.time() - t1:.2f}\n")
+    print(f"Epoch : {epoch + 1} - Top 1: {correct_1 * 100 / c:.2f} - Top 5: {correct_5 * 100 / c:.2f} -  Train Time: {t1 - t0:.2f} - Test Time: {time.time() - t1:.2f}\n")
 
     top1.append(correct_1 * 100 / c)
     top5.append(correct_5 * 100 / c)
