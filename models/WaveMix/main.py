@@ -120,15 +120,15 @@ print(torch.cuda.get_device_properties(device))
 batch_size = 256
 
 # transforms taken from the CIFAR10 example
-transform_train = transforms.Compose(
-    [transforms.RandomHorizontalFlip(p=0.5),
-     transforms.TrivialAugmentWide(),
-     transforms.ToTensor(),
-     transforms.Normalize(0.5, 0.25)])
-
-transform_test = transforms.Compose(
-    [transforms.ToTensor(),
-     transforms.Normalize(0.5, 0.25)])
+# transform_train = transforms.Compose(
+#     [transforms.RandomHorizontalFlip(p=0.5),
+#      transforms.TrivialAugmentWide(),
+#      transforms.ToTensor(),
+#      transforms.Normalize(0.5, 0.25)])
+#
+# transform_test = transforms.Compose(
+#     [transforms.ToTensor(),
+#      transforms.Normalize(0.5, 0.25)])
 
 # Loading the dataset with torchvision.datasets
 # trainset = torchvision.datasets.EMNIST(root='../../resources/datasets/archives', split='letters', train=True,
@@ -148,8 +148,7 @@ if use_custom_train_loader:
                                       # torchvision.transforms.RandomPerspective(),
                                       # torchvision.transforms.RandomRotation(10, fill=(0,)),
                                       torchvision.transforms.ToTensor(),
-                                      torchvision.transforms.Normalize(
-                                          (0.1307,), (0.3081,))
+                                      torchvision.transforms.Normalize((0.1307,), (0.3081,))
                                   ]), train=True)
 
     print(f"Number of train classes: {len(train_dataset.classes)}")
@@ -164,8 +163,7 @@ else:
                                         torchvision.transforms.RandomPerspective(),
                                         torchvision.transforms.RandomRotation(10, fill=(0,)),
                                         torchvision.transforms.ToTensor(),
-                                        torchvision.transforms.Normalize(
-                                            (0.1307,), (0.3081,))
+                                        torchvision.transforms.Normalize((0.1307,), (0.3081,))
                                     ])),
         batch_size=batch_size, shuffle=True)
     train_dataset = train_loader.dataset
@@ -177,8 +175,7 @@ if use_custom_test_loader:
                                      # torchvision.transforms.RandomRotation([90,90]),
                                      # torchvision.transforms.RandomVerticalFlip(1.0),
                                      torchvision.transforms.ToTensor(),
-                                     torchvision.transforms.Normalize(
-                                         (0.1307,), (0.3081,))
+                                     torchvision.transforms.Normalize((0.1307,), (0.3081,))
                                  ]), train=False)
 
     print(f"Number of test classes: {len(test_dataset.classes)}")
@@ -191,8 +188,7 @@ else:
                                     train=False, download=True,
                                     transform=torchvision.transforms.Compose([
                                         torchvision.transforms.ToTensor(),
-                                        torchvision.transforms.Normalize(
-                                            (0.1307,), (0.3081,))
+                                        torchvision.transforms.Normalize((0.1307,), (0.3081,))
                                     ])),
         batch_size=batch_size, shuffle=True)
     test_dataset = test_loader.dataset
