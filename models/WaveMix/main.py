@@ -18,6 +18,7 @@ from tqdm import tqdm
 # use GPU
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
+#TODO: Create proper argparse
 num_classes = 27
 emnist_train_path = '../../resources/datasets/archives/emnist_download/train'
 emnist_test_path = '../../resources/datasets/archives/emnist_download/test'
@@ -25,7 +26,7 @@ use_custom_train_loader = False
 use_custom_test_loader = False
 custom_loader_train_path = '../../resources/datasets/dataset-EMNIST/train-images'
 custom_loader_test_path = '../../resources/datasets/dataset-EMNIST/test-images'
-
+test_only = True
 
 class WaveMix(nn.Module):
     def __init__(
@@ -109,6 +110,23 @@ model = WaveMix(
     final_dim=112,
     dropout=0.5
 )
+
+def testOnly(model):
+    correct_1 = 0
+    correct_5 = 0
+    c = 0
+    print("Entering testing mode")
+    model.eval()
+    with torch.no_grad():
+        for data in test_loader:
+            images, labels = data[0].to(device), data[1].to(device)
+            outputs = model(images)
+            correct_1 += top1_acc(outputs, labels)
+            correct_5 += top5_acc(outputs, labels)
+            c += 1
+
+    print(f"Top 1: {correct_1 * 100 / c:.2f} - Top 5: {correct_5 * 100 / c:.2f}\n")
+
 
 model.to(device)
 # summary
@@ -223,6 +241,13 @@ top5 = []
 traintime = []
 testtime = []
 counter = 0
+
+if test_only:
+    # load saved model
+    PATH = 'model.pth'
+    model.load_state_dict(torch.load(PATH))
+    testOnly(model)
+    exit(0)
 
 # Use AdamW or lion as the first optimizer
 
