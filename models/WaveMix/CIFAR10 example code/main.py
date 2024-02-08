@@ -1,6 +1,7 @@
 # install the required libraries like wavemix, torchmetrics, lion-pytorch
 
 import time
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -10,16 +11,80 @@ from lion_pytorch import Lion
 from torchmetrics.classification import Accuracy
 from torchsummary import summary
 from tqdm import tqdm
-from wavemix.classification import WaveMix
+from wavemix import Level1Waveblock, Level2Waveblock, Level3Waveblock, Level4Waveblock
+from einops.layers.torch import Rearrange
 
 # use GPU
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # For small datasets with low resolution images, use WaveMix with level 1 and use strided convolutions in initial layer with stride of 1
 
+class WaveMix(nn.Module):
+    def __init__(
+            self,
+            *,
+            num_classes=62,
+            depth=16,
+            mult=2,
+            ff_channel=192,
+            final_dim=192,
+            dropout=0.5,
+            level=3,
+            initial_conv='pachify',  # or 'strided'
+            patch_size=4,
+            stride=2,
+
+    ):
+        super().__init__()
+
+        self.layers = nn.ModuleList([])
+        for _ in range(depth):
+            if level == 4:
+                self.layers.append(
+                    Level4Waveblock(mult=mult, ff_channel=ff_channel, final_dim=final_dim, dropout=dropout))
+            elif level == 3:
+                self.layers.append(
+                    Level3Waveblock(mult=mult, ff_channel=ff_channel, final_dim=final_dim, dropout=dropout))
+            elif level == 2:
+                self.layers.append(
+                    Level2Waveblock(mult=mult, ff_channel=ff_channel, final_dim=final_dim, dropout=dropout))
+            else:
+                self.layers.append(
+                    Level1Waveblock(mult=mult, ff_channel=ff_channel, final_dim=final_dim, dropout=dropout))
+
+        self.pool = nn.Sequential(
+            nn.AdaptiveAvgPool2d(1),
+            Rearrange('... () () -> ...'),
+            nn.Linear(final_dim, num_classes)
+        )
+
+        if initial_conv == 'strided':
+            self.conv = nn.Sequential(
+                nn.Conv2d(1, int(final_dim / 2), 3, stride, 1),
+                nn.Conv2d(int(final_dim / 2), final_dim, 3, stride, 1)
+            )
+        else:
+            self.conv = nn.Sequential(
+                nn.Conv2d(1, int(final_dim / 4), 3, 1, 1),
+                nn.Conv2d(int(final_dim / 4), int(final_dim / 2), 3, 1, 1),
+                nn.Conv2d(int(final_dim / 2), final_dim, patch_size, patch_size),
+                nn.GELU(),
+                nn.BatchNorm2d(final_dim)
+            )
+
+    def forward(self, img):
+        x = self.conv(img)
+
+        for attn in self.layers:
+            x = attn(x) + x
+
+        out = self.pool(x)
+
+        return out
+
 # Model
 model = WaveMix(
-    num_classes=10,
+    num_classes=62,
     depth=7,
     mult=2,
     ff_channel=144,
@@ -28,40 +93,39 @@ model = WaveMix(
     level=1,
     initial_conv='strided',
     stride=1
-
 )
 
 model.to(device)
 # summary
-print(summary(model, (3, 32, 32)))
+print(summary(model, (1, 28, 28)))
 print(torch.cuda.get_device_properties(device))
 
 # set batch size according to GPU
-batch_size = 512
+batch_size = 256
 
 # transforms
 transform_train = transforms.Compose(
     [transforms.RandomHorizontalFlip(p=0.5),
      transforms.TrivialAugmentWide(),
-     transforms.ToTensor(),
-     transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2470, 0.2435, 0.2616))])
+     transforms.ToTensor()])
 
 transform_test = transforms.Compose(
-    [transforms.ToTensor(),
-     transforms.Normalize((0.4941, 0.4853, 0.4507), (0.2468, 0.2430, 0.2618))])
+    [transforms.ToTensor()])
 
 # Dataset
-trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_train)
+trainset = torchvision.datasets.EMNIST(root='../../../resources/datasets/archives', split='letters', train=True,
+                                       download=True, transform=transform_train)
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2, pin_memory=True,
                                           prefetch_factor=2, persistent_workers=2)
 
-testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform_test)
+testset = torchvision.datasets.EMNIST(root='../../../resources/datasets/archives', split='letters', train=False,
+                                      download=True, transform=transform_test)
 testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=2, pin_memory=True,
                                          prefetch_factor=2, persistent_workers=2)
 
 # metrics
-top1_acc = Accuracy(task="multiclass", num_classes=10).to(device)
-top5_acc = Accuracy(task="multiclass", num_classes=10, top_k=5).to(device)
+top1_acc = Accuracy(task="multiclass", num_classes=62).to(device)
+top5_acc = Accuracy(task="multiclass", num_classes=62, top_k=5).to(device)
 
 # loss
 criterion = nn.CrossEntropyLoss()

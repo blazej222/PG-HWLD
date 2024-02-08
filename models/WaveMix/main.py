@@ -1,20 +1,31 @@
 # install the required libraries like wavemix, torchmetrics, lion-pytorch
-
+import os
 import time
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
 import wavemix
+from PIL import Image
 from einops.layers.torch import Rearrange
 from lion_pytorch import Lion
 from torchmetrics.classification import Accuracy
 from torchsummary import summary
+from torchvision.datasets import VisionDataset
 from tqdm import tqdm
 
 # use GPU
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+num_classes = 62
+emnist_train_path = '../../resources/datasets/archives'
+emnist_test_path = '../../resources/datasets/archives'
+use_custom_train_loader = False
+use_custom_test_loader = False
+custom_loader_train_path = '../../resources/datasets/dataset-EMNIST/train-images'
+custom_loader_test_path = '../../resources/datasets/dataset-EMNIST/test-images'
 
 
 class WaveMix(nn.Module):
@@ -42,7 +53,7 @@ class WaveMix(nn.Module):
         )
 
         self.conv = nn.Sequential(
-            nn.Conv2d(3, int(final_dim / 2), 3, 1, 1),
+            nn.Conv2d(1, int(final_dim / 2), 3, 1, 1),
             nn.Conv2d(int(final_dim / 2), final_dim, 3, 1, 1)
         )
 
@@ -57,8 +68,42 @@ class WaveMix(nn.Module):
         return out
 
 
+class CustomDataset(VisionDataset):
+    def __init__(self, root, transform=None, train=True):
+        super(CustomDataset, self).__init__(root, transform=transform)
+        self.train = train
+        self.classes = sorted(os.listdir(root))
+        self.file_list = []
+
+        if self.train:
+            for class_name in self.classes:
+                class_path = os.path.join(root, class_name)
+                if os.path.isdir(class_path):
+                    files = os.listdir(class_path)
+                    self.file_list.extend(
+                        [(os.path.join(class_path, f), self.classes.index(class_name) + 1) for f in files])
+        else:
+            for address, dirs, files in os.walk(root):
+                for file in files:
+                    dirname = address.split(os.path.sep)[-1]
+                    self.file_list.append((os.path.normpath(os.path.join(address, file)), ord(dirname) - 96))
+
+        self.transform = transform
+
+    def __getitem__(self, index):
+        file_path, label = self.file_list[index]
+        image = Image.open(file_path)
+
+        if self.transform is not None:
+            image = self.transform(image)
+
+        return image, label
+
+    def __len__(self):
+        return len(self.file_list)
+
 model = WaveMix(
-    num_classes=26,
+    num_classes=num_classes,
     depth=16,
     mult=2,
     ff_channel=112,
@@ -68,7 +113,7 @@ model = WaveMix(
 
 model.to(device)
 # summary
-print(summary(model, (3, 28, 28)))
+print(summary(model, (1, 28, 28)))
 print(torch.cuda.get_device_properties(device))
 
 # set batch size according to GPU
@@ -78,28 +123,86 @@ batch_size = 256
 transform_train = transforms.Compose(
     [transforms.RandomHorizontalFlip(p=0.5),
      transforms.TrivialAugmentWide(),
-     transforms.Grayscale(num_output_channels=3),
      transforms.ToTensor(),
-     transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2470, 0.2435, 0.2616))])
+     transforms.Normalize(0.5, 0.25)])
 
 transform_test = transforms.Compose(
     [transforms.ToTensor(),
-     transforms.Grayscale(num_output_channels=3),
-     transforms.Normalize((0.4941, 0.4853, 0.4507), (0.2468, 0.2430, 0.2618))])
+     transforms.Normalize(0.5, 0.25)])
 
-# Dataset
-trainset = torchvision.datasets.EMNIST(root='../../resources/datasets/archives', split='letters', train=True,
-                                       download=True, transform=transform_train)
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2, pin_memory=True,
-                                          prefetch_factor=2, persistent_workers=2)
+# Loading the dataset with torchvision.datasets
+# trainset = torchvision.datasets.EMNIST(root='../../resources/datasets/archives', split='letters', train=True,
+#                                        download=True, transform=transform_train)
+# train_loader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2, pin_memory=True,
+#                                           prefetch_factor=2, persistent_workers=2)
+#
+# testset = torchvision.datasets.EMNIST(root='../../resources/datasets/archives', split='letters', train=False,
+#                                       download=True, transform=transform_test)
+# test_loader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=2, pin_memory=True,
+#                                          prefetch_factor=2, persistent_workers=2)
 
-testset = torchvision.datasets.EMNIST(root='../../resources/datasets/archives', split='letters', train=False,
-                                      download=True, transform=transform_test)
-testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=2, pin_memory=True,
-                                         prefetch_factor=2, persistent_workers=2)
+if use_custom_train_loader:
+
+    train_dataset = CustomDataset(custom_loader_train_path,
+                                  transform=torchvision.transforms.Compose([
+                                      # torchvision.transforms.RandomPerspective(),
+                                      # torchvision.transforms.RandomRotation(10, fill=(0,)),
+                                      torchvision.transforms.ToTensor(),
+                                      torchvision.transforms.Normalize(
+                                          (0.1307,), (0.3081,))
+                                  ]), train=True)
+
+    print(f"Number of train classes: {len(train_dataset.classes)}")
+
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+
+else:
+    train_loader = torch.utils.data.DataLoader(
+        torchvision.datasets.EMNIST(emnist_train_path, split='letters',
+                                    train=True, download=True,
+                                    transform=torchvision.transforms.Compose([
+                                        torchvision.transforms.RandomPerspective(),
+                                        torchvision.transforms.RandomRotation(10, fill=(0,)),
+                                        torchvision.transforms.ToTensor(),
+                                        torchvision.transforms.Normalize(
+                                            (0.1307,), (0.3081,))
+                                    ])),
+        batch_size=batch_size, shuffle=True)
+    train_dataset = train_loader.dataset
+
+if use_custom_test_loader:
+
+    test_dataset = CustomDataset(custom_loader_test_path,
+                                 transform=torchvision.transforms.Compose([
+                                     # torchvision.transforms.RandomRotation([90,90]),
+                                     # torchvision.transforms.RandomVerticalFlip(1.0),
+                                     torchvision.transforms.ToTensor(),
+                                     torchvision.transforms.Normalize(
+                                         (0.1307,), (0.3081,))
+                                 ]), train=False)
+
+    print(f"Number of test classes: {len(test_dataset.classes)}")
+
+    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
+
+else:
+    test_loader = torch.utils.data.DataLoader(
+        torchvision.datasets.EMNIST(emnist_test_path, split='letters',
+                                    train=False, download=True,
+                                    transform=torchvision.transforms.Compose([
+                                        torchvision.transforms.ToTensor(),
+                                        torchvision.transforms.Normalize(
+                                            (0.1307,), (0.3081,))
+                                    ])),
+        batch_size=batch_size, shuffle=True)
+    test_dataset = test_loader.dataset
+
+# Loading the dataset from our own files
+
+
 # metrics
-top1_acc = Accuracy(task="multiclass", num_classes=26).to(device)
-top5_acc = Accuracy(task="multiclass", num_classes=26, top_k=5).to(device)
+top1_acc = Accuracy(task="multiclass", num_classes=num_classes).to(device)
+top5_acc = Accuracy(task="multiclass", num_classes=num_classes, top_k=5).to(device)
 
 # loss
 criterion = nn.CrossEntropyLoss()
@@ -134,7 +237,7 @@ while counter < 20:  # Counter sets the number of epochs of non improvement befo
     running_loss = 0.0
     model.train()
 
-    with tqdm(trainloader, unit="batch") as tepoch:
+    with tqdm(train_loader, unit="batch") as tepoch:
         tepoch.set_description(f"Epoch {epoch + 1}")
 
         for data in tepoch:
@@ -148,8 +251,8 @@ while counter < 20:  # Counter sets the number of epochs of non improvement befo
             scaler.update()
 
             acc = (outputs.argmax(dim=1) == labels).float().mean()
-            epoch_accuracy += acc / len(trainloader)
-            epoch_loss += loss / len(trainloader)
+            epoch_accuracy += acc / len(train_loader)
+            epoch_loss += loss / len(train_loader)
             tepoch.set_postfix_str(f" loss : {epoch_loss:.4f} - acc: {epoch_accuracy:.4f}")
 
     correct_1 = 0
@@ -158,7 +261,7 @@ while counter < 20:  # Counter sets the number of epochs of non improvement befo
     model.eval()
     t1 = time.time()
     with torch.no_grad():
-        for data in testloader:
+        for data in test_loader:
             images, labels = data[0].to(device), data[1].to(device)
             outputs = model(images)
             correct_1 += top1_acc(outputs, labels)
@@ -193,7 +296,7 @@ while counter < 20:  # loop over the dataset multiple times
     running_loss = 0.0
     model.train()
 
-    with tqdm(trainloader, unit="batch") as tepoch:
+    with tqdm(train_loader, unit="batch") as tepoch:
         tepoch.set_description(f"Epoch {epoch + 1}")
 
         for data in tepoch:
@@ -207,8 +310,8 @@ while counter < 20:  # loop over the dataset multiple times
             scaler.update()
 
             acc = (outputs.argmax(dim=1) == labels).float().mean()
-            epoch_accuracy += acc / len(trainloader)
-            epoch_loss += loss / len(trainloader)
+            epoch_accuracy += acc / len(train_loader)
+            epoch_loss += loss / len(train_loader)
             tepoch.set_postfix_str(f" loss : {epoch_loss:.4f} - acc: {epoch_accuracy:.4f}")
 
     correct_1 = 0
@@ -217,7 +320,7 @@ while counter < 20:  # loop over the dataset multiple times
     model.eval()
     t1 = time.time()
     with torch.no_grad():
-        for data in testloader:
+        for data in test_loader:
             images, labels = data[0].to(device), data[1].to(device)
             outputs = model(images)
             correct_1 += top1_acc(outputs, labels)
@@ -241,5 +344,4 @@ while counter < 20:  # loop over the dataset multiple times
 
 print('Finished Training')
 print("Results")
-print(
-    f"Top 1 Accuracy: {max(top1):.2f} -Top 5 Accuracy : {max(top5):.2f} - Train Time: {min(traintime):.0f} -Test Time: {min(testtime):.0f}\n")
+print(f"Top 1 Accuracy: {max(top1):.2f} -Top 5 Accuracy : {max(top5):.2f} - Train Time: {min(traintime):.0f} -Test Time: {min(testtime):.0f}\n")
