@@ -14,19 +14,37 @@ from torchmetrics.classification import Accuracy
 from torchsummary import summary
 from torchvision.datasets import VisionDataset
 from tqdm import tqdm
+import argparse
 
 # use GPU
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-#TODO: Create proper argparse
+parser = argparse.ArgumentParser(description='WaveMix')
+parser.add_argument('--train_path', default=None,
+                    help="Path to the training dataset")
+parser.add_argument('--test_path', default=None,
+                    help="Path to the testing dataset")
+parser.add_argument('--test', action='store_true', default=False,
+                    help="Whether we should test the model without training. Weights must be specified.")
+parser.add_argument('--saved_model_path', default='./saved_models',
+                    help="Path to directory containing saved model weights. Weights from training will be saved there")
+parser.add_argument('--model_filename', default='model.pth',
+                    help="Weights filename")
+args = parser.parse_args()
+
 num_classes = 27
 emnist_train_path = '../../resources/datasets/archives/emnist_download/train'
 emnist_test_path = '../../resources/datasets/archives/emnist_download/test'
-use_custom_train_loader = False
-use_custom_test_loader = False
-custom_loader_train_path = '../../resources/datasets/dataset-EMNIST/train-images'
-custom_loader_test_path = '../../resources/datasets/dataset-EMNIST/test-images'
-test_only = True
+use_custom_train_loader = True
+use_custom_test_loader = True
+custom_loader_test_path = args.test_path
+custom_loader_train_path = args.train_path
+test_only = args.test
+
+if custom_loader_train_path is None:
+    use_custom_train_loader = False
+if custom_loader_test_path is None:
+    use_custom_test_loader = False
 
 class WaveMix(nn.Module):
     def __init__(
@@ -244,8 +262,7 @@ counter = 0
 
 if test_only:
     # load saved model
-    PATH = 'model.pth'
-    model.load_state_dict(torch.load(PATH))
+    model.load_state_dict(torch.load(os.path.join(args.saved_model_path,args.model_filename)))
     testOnly(model)
     exit(0)
 
@@ -310,15 +327,14 @@ while counter < 20:  # Counter sets the number of epochs of non improvement befo
     counter += 1
     epoch += 1
     if float(correct_1 * 100 / c) >= float(max(top1)):
-        PATH = 'model.pth'
-        torch.save(model.state_dict(), PATH)
+        torch.save(model.state_dict(), os.path.join(args.saved_model_path,args.model_filename))
         print(1)
         counter = 0
 
 # Second Optimizer
 print('Training with SGD')
 
-model.load_state_dict(torch.load(PATH))
+model.load_state_dict(torch.load(os.path.join(args.saved_model_path,args.model_filename)))
 optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
 while counter < 20:  # loop over the dataset multiple times
@@ -368,8 +384,7 @@ while counter < 20:  # loop over the dataset multiple times
     counter += 1
     epoch += 1
     if float(correct_1 * 100 / c) >= float(max(top1)):
-        PATH = 'model.pth'
-        torch.save(model.state_dict(), PATH)
+        torch.save(model.state_dict(), os.path.join(args.saved_model_path,args.model_filename))
         print(1)
         counter = 0
 
