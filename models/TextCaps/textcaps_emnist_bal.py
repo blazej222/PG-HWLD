@@ -19,6 +19,9 @@ import numpy as np
 import tensorflow as tf
 import os
 import argparse
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 K.set_image_data_format('channels_last')
 
@@ -136,6 +139,21 @@ def test(model, data, args):
     y_pred, x_recon = model.predict(x_test, batch_size=args.batch_size*8)
     print('-'*30 + 'Begin: test' + '-'*30)
     print('Test acc:', np.sum(np.argmax(y_pred, 1) == np.argmax(y_test, 1))/float(y_test.shape[0]))
+
+    # Generate confusion matrix
+    y_test_labels = np.argmax(y_test, axis=1)
+    y_pred_labels = np.argmax(y_pred, axis=1)
+    cm = confusion_matrix(y_test_labels, y_pred_labels)
+    class_names = [chr(i) for i in range(97, 123)]  # ASCII values for a-z
+
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False, xticklabels=class_names,
+                yticklabels=class_names)
+    plt.xlabel('Predicted')
+    plt.ylabel('True')
+    plt.title('Confusion Matrix - TextCaps')
+    plt.savefig('Confusion Matrix - TextCaps.png')
+    plt.show()
     
 class dataGeneration():
     def __init__(self, model,data,args,samples_to_generate = 2):

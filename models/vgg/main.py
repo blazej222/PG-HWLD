@@ -18,7 +18,9 @@ import matplotlib.pyplot as plt
 import string
 import PIL.ImageOps
 import argparse
-
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
+import seaborn as sns
 class CustomDataset(VisionDataset):
     def __init__(self, root, transform=None, train=True):
         super(CustomDataset, self).__init__(root, transform=transform)
@@ -400,12 +402,20 @@ def test_model(model1,model2):
         total1 = 0
         correct2 = 0
         total2 = 0
+        all_preds_1 = []
+        all_labels_1 = []
+        all_preds_2 = []
+        all_labels_2 = []
         for images, labels in test_loader:
             images = images.to(device)
             labels = labels.to(device)
 
             outputs = model1(images)
             _, predicted = torch.max(outputs.data, 1)
+
+            all_preds_1.extend(predicted.cpu().numpy())
+            all_labels_1.extend(labels.cpu().numpy())
+
             total1 += labels.size(0)
             correct1 += (predicted == labels).sum().item()
 
@@ -419,8 +429,13 @@ def test_model(model1,model2):
             #
             outputs = model2(images)
             _, predicted = torch.max(outputs.data, 1)
+
+            all_preds_2.extend(predicted.cpu().numpy())
+            all_labels_2.extend(labels.cpu().numpy())
+
             total2 += labels.size(0)
             correct2 += (predicted == labels).sum().item()
+
             #
             # for i in range(len(labels)):
             #     label = labels[i].item()
@@ -432,6 +447,28 @@ def test_model(model1,model2):
         print('Test Accuracy of NN: {} %'.format(100 * correct1 / total1))
 
         print('Test Accuracy of SpinalNet: {} %'.format(100 * correct2 / total2))
+
+        # Generate and display confusion matrix
+        cm = confusion_matrix(all_labels_1, all_preds_1)
+        plt.figure(figsize=(10, 8))
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False, xticklabels=test_dataset.classes,
+                    yticklabels=test_dataset.classes)
+        plt.xlabel('Predicted')
+        plt.ylabel('True')
+        plt.title('Confusion Matrix - VGG')
+        plt.savefig('Confusion Matrix - VGG.png')
+        plt.show()
+
+        # Generate and display confusion matrix
+        cm = confusion_matrix(all_labels_2, all_preds_2)
+        plt.figure(figsize=(10, 8))
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False, xticklabels=test_dataset.classes,
+                    yticklabels=test_dataset.classes)
+        plt.xlabel('Predicted')
+        plt.ylabel('True')
+        plt.title('Confusion Matrix - VGG SpinalNet')
+        plt.savefig('Confusion Matrix - VGG(SpinalNet).png')
+        plt.show()
 
 # Train the model
 total_step = len(train_loader)

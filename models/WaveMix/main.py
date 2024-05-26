@@ -15,6 +15,9 @@ from torchsummary import summary
 from torchvision.datasets import VisionDataset
 from tqdm import tqdm
 import argparse
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # use GPU
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -133,17 +136,36 @@ def testOnly(model):
     correct_1 = 0
     correct_5 = 0
     c = 0
+    all_preds = []
+    all_labels = []
+
     print("Entering testing mode")
     model.eval()
     with torch.no_grad():
         for data in test_loader:
             images, labels = data[0].to(device), data[1].to(device)
             outputs = model(images)
+
+            # Collect all predictions and labels
+            _, preds = torch.max(outputs, 1)
+            all_preds.extend(preds.cpu().numpy())
+            all_labels.extend(labels.cpu().numpy())
+
             correct_1 += top1_acc(outputs, labels)
             correct_5 += top5_acc(outputs, labels)
             c += 1
 
     print(f"Top 1: {correct_1 * 100 / c:.2f} - Top 5: {correct_5 * 100 / c:.2f}\n")
+
+    # Generate and display confusion matrix
+    cm = confusion_matrix(all_labels, all_preds)
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False, xticklabels=test_dataset.classes, yticklabels=test_dataset.classes)
+    plt.xlabel('Predicted')
+    plt.ylabel('True')
+    plt.title('Confusion Matrix - WaveMix')
+    plt.savefig('Confusion Matrix - WaveMix.png')
+    plt.show()
 
 
 model.to(device)
@@ -153,28 +175,6 @@ print(torch.cuda.get_device_properties(device))
 
 # set batch size according to GPU
 batch_size = 256
-
-# transforms taken from the CIFAR10 example
-# transform_train = transforms.Compose(
-#     [transforms.RandomHorizontalFlip(p=0.5),
-#      transforms.TrivialAugmentWide(),
-#      transforms.ToTensor(),
-#      transforms.Normalize(0.5, 0.25)])
-#
-# transform_test = transforms.Compose(
-#     [transforms.ToTensor(),
-#      transforms.Normalize(0.5, 0.25)])
-
-# Loading the dataset with torchvision.datasets
-# trainset = torchvision.datasets.EMNIST(root='../../resources/datasets/archives', split='letters', train=True,
-#                                        download=True, transform=transform_train)
-# train_loader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2, pin_memory=True,
-#                                           prefetch_factor=2, persistent_workers=2)
-#
-# testset = torchvision.datasets.EMNIST(root='../../resources/datasets/archives', split='letters', train=False,
-#                                       download=True, transform=transform_test)
-# test_loader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=2, pin_memory=True,
-#                                          prefetch_factor=2, persistent_workers=2)
 
 if use_custom_train_loader:
 
@@ -262,7 +262,7 @@ counter = 0
 
 if test_only:
     # load saved model
-    model.load_state_dict(torch.load(os.path.join(args.saved_model_path,args.model_filename)))
+    model.load_state_dict(torch.load(str(os.path.join(args.saved_model_path,args.model_filename))))
     testOnly(model)
     exit(0)
 
@@ -327,14 +327,14 @@ while counter < 20:  # Counter sets the number of epochs of non improvement befo
     counter += 1
     epoch += 1
     if float(correct_1 * 100 / c) >= float(max(top1)):
-        torch.save(model.state_dict(), os.path.join(args.saved_model_path,args.model_filename))
+        torch.save(model.state_dict(), str(os.path.join(args.saved_model_path,args.model_filename)))
         print(1)
         counter = 0
 
 # Second Optimizer
 print('Training with SGD')
 
-model.load_state_dict(torch.load(os.path.join(args.saved_model_path,args.model_filename)))
+model.load_state_dict(torch.load(str(os.path.join(args.saved_model_path,args.model_filename))))
 optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
 while counter < 20:  # loop over the dataset multiple times
@@ -384,7 +384,7 @@ while counter < 20:  # loop over the dataset multiple times
     counter += 1
     epoch += 1
     if float(correct_1 * 100 / c) >= float(max(top1)):
-        torch.save(model.state_dict(), os.path.join(args.saved_model_path,args.model_filename))
+        torch.save(model.state_dict(), str(os.path.join(args.saved_model_path,args.model_filename)))
         print(1)
         counter = 0
 
