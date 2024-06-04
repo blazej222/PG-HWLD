@@ -3,8 +3,9 @@ import numpy as np
 from scipy import ndimage
 import cv2
 import os
+import argparse
 
-#TODO:Implement multi processing
+# TODO:Implement multi processing
 
 
 def image_rotate(imageFile, angle):
@@ -34,25 +35,20 @@ def rotateAll(location, destination, angle):
 
 
 def main():
-    location = "../../resources/datasets/unpacked/dataset-multi-person-cropped-20"
-    destination = "../../resources/datasets/augmented/dataset-multi-person-cropped-20-augmented"
-    rotateAll(location, destination, 15)
-    rotateAll(location, destination, 10)
-    rotateAll(location, destination, 5)
-    rotateAll(location, destination, 0)
-    rotateAll(location, destination, -5)
-    rotateAll(location, destination, -10)
-    rotateAll(location, destination, -15)
+    parser = argparse.ArgumentParser(description='Rotate all samples by a certain angle.')
+    parser.add_argument('--source', type=str, required=True,
+                        help='Dataset source directory.')
+    parser.add_argument('--destination', type=str, required=True,
+                        help='Processed dataset destination directory.')
+    parser.add_argument('--angle', type=int, required=True,
+                        help='Angle of rotation.')
+    args = parser.parse_args()
 
-    location = "../../resources/datasets/unpacked/dataset-single-person-cropped-20"
-    destination = "../../resources/datasets/augmented/dataset-single-person-cropped-20-augmented"
-    rotateAll(location, destination, 15)
-    rotateAll(location, destination, 10)
-    rotateAll(location, destination, 5)
-    rotateAll(location, destination, 0)
-    rotateAll(location, destination, -5)
-    rotateAll(location, destination, -10)
-    rotateAll(location, destination, -15)
+    location = args.source
+    destination = args.destination
+    angle = args.angle
+
+    rotateAll(location, destination, angle)
 
 
 if __name__ == '__main__':

@@ -2,6 +2,7 @@ import struct
 import numpy as np
 from PIL import Image
 import os
+import argparse
 
 
 def array_to_images(imageFileName, location):
@@ -115,16 +116,26 @@ def txt_labelFile_to_array(txtFileName, numImages):
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        description='Convert dataset from idx3-ubyte format to extracted_undivided format.')
+    parser.add_argument('--source', type=str, required=True,
+                        help='Dataset source file in idx3-ubyte format.')
+    parser.add_argument('--destination', type=str, required=True,
+                        help='Training and testing dataset destination directory.')
+    parser.add_argument('--angle', type=int, required=True,
+                        help='Angle of rotation.')
+    args = parser.parse_args()
+
     filename = "../../resources/datasets/archives/EMNIST-binary/emnist-letters-train-images-idx3-ubyte"
     labelFile = "../../resources/datasets/archives/EMNIST-binary/emnist-letters-train-labels-idx1-ubyte"
     location = "../../resources/datasets/dataset-EMNIST/train-images"
-    #array_to_images_sorted(filename, location, labelFile)
+    # array_to_images_sorted(filename, location, labelFile)
 
     filename = "../../resources/datasets/archives/EMNIST-binary/emnist-letters-test-images-idx3-ubyte"
     labelFile = "../../resources/datasets/archives/EMNIST-binary/emnist-letters-test-labels-idx1-ubyte"
     location = "../../resources/datasets/dataset-EMNIST/test-images"
-    #numImages = array_to_images(filename, location)
-    #labelFile_to_txt(labelFile, "../../resources/datasets/dataset-EMNIST/test-labels.txt", numImages)
+    # numImages = array_to_images(filename, location)
+    # labelFile_to_txt(labelFile, "../../resources/datasets/dataset-EMNIST/test-labels.txt", numImages)
     array_to_images_sorted(filename, location, labelFile)
 
 

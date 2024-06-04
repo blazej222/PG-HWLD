@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import multiprocessing as mp
 from time import time
+import argparse
 
 
 def EMNISTify(image, threshold, verbose=False):
@@ -80,9 +81,9 @@ def EMNISTify(image, threshold, verbose=False):
 
 
 def EMNISTify_file(address, file, threshold, destination, location, verbose=False):
-    image = cv2.imread(os.path.join(address, file))
+    image = cv2.imread(str(os.path.join(address, file)))
     processed_image = EMNISTify(image, threshold,verbose)
-    cv2.imwrite(os.path.join(destination + address.replace(location, ''), file), processed_image)
+    cv2.imwrite(str(os.path.join(destination + address.replace(location, ''), file)), processed_image)
 
 
 def EMNISTify_catalog(location, destination, threshold=100, verbose=False):
@@ -105,16 +106,24 @@ def EMNISTify_catalog(location, destination, threshold=100, verbose=False):
 
 
 def main():
+    parser = argparse.ArgumentParser(description='Apply image modifications to each sample to make it more similiar to EMNIST.')
+    parser.add_argument('--source', type=str, required=True,
+                        help='Dataset source directory.')
+    parser.add_argument('--destination', type=str, required=True,
+                        help='Processed dataset destination directory.')
+    parser.add_argument('--threshold', type=int, default=100,
+                        help='Threshold value.')
+    parser.add_argument('--verbose', type=bool, action='store_true', default=False,
+                        help='Print debug info.')
+    args = parser.parse_args()
+
+    location = args.source
+    destination = args.destination
+    threshold = args.threshold
+    verbose = args.verbose
     start = time()
 
-    # TEST RUN
-    input_image = cv2.imread("../../resources/uploaded-images/z.png")
-    # EMNISTify_catalog("../../resources/uploaded-images", "../../resources/processed-images", threshold=100, verbose=True)
-
-    EMNISTify_catalog("../../resources/datasets/unpacked/dataset-multi-person",
-                      f"../../resources/datasets/processed/dataset-processed", threshold=100)
-    EMNISTify_catalog("../../resources/datasets/unpacked/dataset-single-person",
-                      f"../../resources/datasets/processed/dataset-processed", threshold=100)
+    EMNISTify_catalog(location,destination, threshold,verbose)
 
     end = time()
     print(f"Finished in {end - start}")

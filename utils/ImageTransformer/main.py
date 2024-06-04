@@ -3,6 +3,8 @@ import numpy as np
 import cv2
 import os
 import multiprocessing as mp
+import argparse
+
 
 def image_transform(imageFile, denoise=True):
     imageFile = cv2.cvtColor(imageFile, cv2.COLOR_BGR2GRAY)
@@ -23,7 +25,8 @@ def remove_shadows(image):
     cv2.normalize(transformedImg, transformedImg, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8UC1)
     return transformedImg
 
-#TODO: Check if eliminating reshapes speeds things up
+
+# TODO: Check if eliminating reshapes speeds things up
 def flat_denoise(image, threshold):
     width = image.shape[1]
     height = image.shape[0]
@@ -38,8 +41,9 @@ def flat_denoise(image, threshold):
 def sig(x, parameter):
     return 1 / (1 + np.exp((-parameter) * (x - 127)))
 
-# TODO (Blazej): Check if faster MP approach exists
-def transformSingle(file,address,denoise,destination,location,removeOriginals):
+
+# TODO : Check if faster MP approach exists
+def transformSingle(file, address, denoise, destination, location, removeOriginals):
     if file.endswith(".png") or file.endswith(".jpg") or file.endswith(".bmp"):
         image = cv2.imread(os.path.join(address, file))
         transformed_image = image_transform(image, denoise)
@@ -47,6 +51,7 @@ def transformSingle(file,address,denoise,destination,location,removeOriginals):
         cv2.imwrite(transformed_image_name, transformed_image)
         if removeOriginals:
             os.remove(os.path.join(address, file))
+
 
 def transformAll(location, destination, removeOriginals=False, denoise=True):
     if not os.path.exists(destination):
@@ -60,7 +65,8 @@ def transformAll(location, destination, removeOriginals=False, denoise=True):
                 os.makedirs(os.path.join(temp, directory))
 
         pool = mp.Pool()
-        process = pool.starmap_async(transformSingle,[(x,address,denoise,destination,location,removeOriginals) for x in files])
+        process = pool.starmap_async(transformSingle,
+                                     [(x, address, denoise, destination, location, removeOriginals) for x in files])
         pool.close()
         pool.join()
 
@@ -68,15 +74,18 @@ def transformAll(location, destination, removeOriginals=False, denoise=True):
 
 
 def main():
+    parser = argparse.ArgumentParser(description='Channel reduction to grayscale, normalization, shadow removal '
+                                                 'and image scaling to 28x28px.')
+    parser.add_argument('--source', type=str, required=True,
+                        help='Dataset source directory.')
+    parser.add_argument('--destination', type=str, required=True,
+                        help='Processed dataset destination directory.')
 
-    location = "../../resources/datasets/augmented"
-    destination = "../../resources/datasets/transformed"
-    #TODO: Append transformed suffix?
+    args = parser.parse_args()
 
-    #destination = "../../resources/datasets/transformed/ultimate_dataset_3000"
-
-    location = "../../resources/datasets/augmented/dataset-single-person-cropped-20-augmented"
-    destination = "../../resources/datasets/transformed/dataset-single-person-cropped-20-augmented"
+    location = args.source
+    destination = args.destination
+    # TODO: Append transformed suffix?
     transformAll(location, destination)
 
 

@@ -1,7 +1,7 @@
 import os
 import random
 import shutil
-
+import argparse
 
 def split_directory(data_dir, train_dir, val_dir, split_ratio):
     os.makedirs(train_dir, exist_ok=True)
@@ -39,10 +39,24 @@ def split_directory(data_dir, train_dir, val_dir, split_ratio):
 
 
 def main():
-    split_directory(data_dir="../../resources/datasets/transformed/ultimate_dataset_3000",
-                    train_dir="../../resources/datasets/divided/ultimate_dataset_3000/train-images",
-                    val_dir="../../resources/datasets/divided/ultimate_dataset_3000/test-images",
-                    split_ratio=0.8)
+    parser = argparse.ArgumentParser(description='Split dataset into training and validation subsets respecting split ratio.')
+    parser.add_argument('--source', type=str, required=True,
+                        help='Dataset source directory.')
+    parser.add_argument('--destination', type=str, required=True,
+                        help='Training and testing dataset destination directory.')
+    parser.add_argument('--split_ratio', type=int, default=0.8,
+                        help='Split ratio between training and testing sets.')
+    args = parser.parse_args()
+
+    data_dir = args.source
+    train_dir = args.destination + "/train-images"
+    val_dir = args.destination + "/test-images"
+    split_ratio = args.split_ratio
+
+    split_directory(data_dir,
+                    train_dir,
+                    val_dir,
+                    split_ratio)
 
 
 if __name__ == '__main__':

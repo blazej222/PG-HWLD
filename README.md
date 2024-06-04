@@ -21,7 +21,8 @@ The following dataset formats are being used in the project:
 - `idx-ubyte` - binary files containing encoded labels and dataset images.
 - `.mat` - dataset images and labels stored inside matlab file.
 - `extracted` - dataset images extracted into `train` and `test` directories, with separate directories for each class.
-Example - letter a sample used for training can be stored as `train/a/xxxx.png`.
+Example - letter `a` sample used for training can be stored as `train/a/xxxx.png`.
+- `extracted_undivided` - same as above but samples aren't divided into `train` and `test` directories.
 
 ## Getting started
 
@@ -100,37 +101,97 @@ Model behavior can be modified by using the following optional arguments:
 * `--save_dir` - Directory where snapshots of the model will be saved.
 * `--weights` - The path of the saved weights. Should be specified when testing.  Default is empty.
 * `--data_generate` - If specified will generate new data with pre-trained model. Requires `--weights` to be specified. Not specified by default.
-* `--samples_to_generate` - this option is used only when `--data_generate` is specified.
+* `--samples_to_generate` - This option is used only when `--data_generate` is specified.
 * `--test` - If this option is specified, the model will only be tested (training is disabled). Requires `--weights` to be specified.
 
 ## Description of utilities
 
 ### DataSetPacker 
-DataSetPacker provides an ability to pack the dataset from by-class directory format to `.mat` (used by TextCaps model).
+DataSetPacker provides an ability to pack the dataset from `extracted` to `.mat` format (used by TextCaps model).
+
+The following arguments are accepted by this utility:
+
+- `--source` - Source directory of dataset in `extracted` format (required).
+- `--destination` - Destination directory where resulting dataset in `.mat` format will be placed (required).
+- `--reverse_colors` - Whether colors of the images should be inverted. Helpful when converting from
+  (white background,black letters) to (black background,white letters) format used by EMNIST. `False` by default.
+- `--filename` - Name of the resulting `.mat` file containing converted dataset.
 
 ### DirectorySplitter
-DirectorySplitter splits a dataset into `train` and `test` directories by moving files to appropriate folders, respecting `split_ratio`.
+DirectorySplitter splits a dataset from `extracted_undivided` format
+into `train` and `test` directories by moving files to appropriate folders, respecting `split_ratio`.
+Resulting dataset is in `extracted` format.
+
+The following arguments are accepted by this utility:
+
+- `--source` - Source directory of dataset in `extracted_undivided` format (required).
+- `--destination` - Destination directory where resulting dataset in `extracted` format will be placed (required).
+- `--split_ratio` - Split ratio between training and testing sets. Default is `0.8`, meaning 80% of samples will 
+go to training subset and 20% of samples will go to testing subset.
  
 ### DataAugmenter
-Data augmenter creates multiple variants of the source dataset by rotating each sample by -15, -10, -5, 5, 10, 15 degrees.
+Data augmenter creates multiple variants of the source dataset by rotating each sample by a certain amount of degrees.
+
+The following arguments are accepted by this utility:
+
+- `--source` - Source directory of dataset in `extracted_undivided` format (required).
+- `--destination` - Destination directory where resulting rotated dataset in `extracted_undivided` format will be placed (required).
+- `--angle` - Rotation angle of each sample. This parameter is required.
 
 ### DataSetConverter
-Utility that extracts sample images from dataset in `.idx-ubyte` format to separate `.png` images. 
+Utility that extracts sample images from dataset in `.idx-ubyte` format to separate `.png` images 
+(dataset in `extracted_undivided` format). 
 Also creates `.txt` file / numpy array with labels for each letter.
 
-### DirectorySplitter
-Splits source dataset into `train` and `test` subsets according to `split_ratio`. Results in creation of `extracted` dataset.
+
 
 ### EMNISTifier
-Transforms source dataset into a dataset more familiar to EMNIST dataset by inverting image color scale, 
+Transforms source dataset in `extracted_undivided` format into a dataset more familiar to EMNIST dataset by inverting image color scale, 
 applying Gaussian Filter and centering the images. More details are available in our paper.
+
+The following arguments are accepted by this utility:
+
+- `--source` - Source directory of dataset in `extracted_undivided` format (required).
+- `--destination` - Destination directory where resulting processed dataset in `extracted_undivided` format will be placed (required).
+- `--threshold` -  For every pixel, the same threshold value is applied. 
+If the pixel value is smaller than the threshold, it is set to 0, otherwise it is set to a maximum value. Default is `100`.
+- `--verbose` - Whether debug data should be printed. `False` by default.
 
 ### ImageCropper
 Automatically detect contour of dark image on white background, center it and add white margin to image from
 dataset.
 
+The following arguments are accepted by this utility:
+
+- `--source` - Source directory of dataset in `extracted_undivided` format (required).
+- `--destination` - Destination directory where resulting cropped dataset will be placed in `extracted_undivided` format (required).
+- `--threshold` -  For every pixel, the same threshold value is applied. 
+If the pixel value is smaller than the threshold, it is set to 0, otherwise it is set to a maximum value. Default is `100`.
+- `--margin` - Size of added margin. This argument is required.
+
 ### ImageCutter
 Divide previously fitted scans of letter sheets collected as part of collecting data sets into a rectangular grid.
 
+The following arguments are accepted by this utility:
+
+- `--source` - Source directory of scanned letter sheets (required).
+- `--destination` - Destination directory where resulting dataset will be placed in `extracted_undivided` format (required).
+- `--left_margin` - Margin from the left side of the sheet/letter where cutting will start. Default is `36`px.
+- `--upper_margin` - Margin from the top side of the sheet/letter row where cutting will start. Default is `48`px.
+- `--crop_width` - How much each letter should be cropped horizontally. Default is `196`px.
+- `--crop_height` - How much each letter should be cropped vertically. Default is `196`px.
+- `--divisor` - Additional gap applied between each letter both vertically and horizontally. Default is `5`px.
+- `--num_tiles_x` - Amount of tiles in x direction on scanned page (horizontally). Default is `12`.
+- `--num_tiles_y` - Amount of tiles in y direction on scanned page (vertically). Default is `17`.
+- `--num_files` - Amount of samples that should be obtained from each scan page. After extracting this 
+number of samples extracting process will stop and utility will move to another scan file. 
+
+
 ### ImageTransformer
 Channel reduction to grayscale, normalization, shadow removal and image scaling to 28x28px.
+
+The following arguments are accepted by this utility:
+
+- `--source` - Source directory of dataset in `extracted_undivided` format (required).
+- `--destination` - Destination directory where processed dataset in `extracted_undivided` format will be 
+placed (required).
