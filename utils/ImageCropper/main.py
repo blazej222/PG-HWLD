@@ -8,6 +8,18 @@ import argparse
 
 
 def crop_black_letter(image, margin, threshold):
+    """
+    Detects the contour of a dark object on a white background, crops it with a margin,
+    and returns the cropped image. If necessary, it centers the object in a new image.
+
+    Args:
+        image (numpy.ndarray): Input image in BGR format.
+        margin (int): Margin to add around the cropped object.
+        threshold (int): Threshold value for binary segmentation.
+
+    Returns:
+        numpy.ndarray: Cropped image with the object centered.
+    """
     # Invert the image (black on white to white on black)
     inverted = cv2.bitwise_not(image)
 
@@ -69,12 +81,32 @@ def crop_black_letter(image, margin, threshold):
 
 
 def crop_black_letters_file(address, file, margin, threshold, destination, location):
+    """
+    Processes a single image file to detect and crop a dark object on a white background.
+
+    Args:
+        address (str): Directory of the image file.
+        file (str): Name of the image file.
+        margin (int): Margin to add around the cropped object.
+        threshold (int): Threshold value for binary segmentation.
+        destination (str): Path to the destination directory.
+        location (str): Path to the source directory.
+    """
     image = cv2.imread(str(os.path.join(address, file)))
     cropped_image = crop_black_letter(image, margin, threshold)
     cv2.imwrite(str(os.path.join(destination + address.replace(location, ''), file)), cropped_image)
 
 
 def crop_black_letters_catalog(location, destination, margin=0, threshold=100):
+    """
+    Processes all image files in a directory to detect and crop dark objects on white backgrounds.
+
+    Args:
+        location (str): Path to the source directory.
+        destination (str): Path to the destination directory.
+        margin (int, optional): Margin to add around the cropped objects. Default is 0.
+        threshold (int, optional): Threshold value for binary segmentation. Default is 100.
+    """
     if not os.path.exists(destination):
         os.makedirs(destination)
 

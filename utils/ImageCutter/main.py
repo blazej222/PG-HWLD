@@ -7,6 +7,21 @@ from PIL import Image
 
 def cut_image(image_path, destination, crop_width, crop_height, left_margin, upper_margin, divisor, num_tiles_x,
               num_tiles_y, num_files):
+    """
+       Cuts an image into smaller tiles and saves them to a specified destination.
+
+       Args:
+           image_path (str): Path to the input image.
+           destination (str): Path to the destination directory.
+           crop_width (int): Width of each cropped tile.
+           crop_height (int): Height of each cropped tile.
+           left_margin (int): Left margin for the cropping.
+           upper_margin (int): Upper margin for the cropping.
+           divisor (int): Gap size between the tiles.
+           num_tiles_x (int): Number of tiles in the horizontal direction.
+           num_tiles_y (int): Number of tiles in the vertical direction.
+           num_files (int): Maximum number of tiles to save. If -1, save all possible tiles.
+       """
     image = Image.open(image_path)
     subdirectory = destination + f"/{ntpath.basename(image_path)[0]}"
     if not os.path.exists(subdirectory):
@@ -37,6 +52,21 @@ def cut_image(image_path, destination, crop_width, crop_height, left_margin, upp
 
 def cut_image_catalog(location, destination, crop_width, crop_height, left_margin, upper_margin, divisor, num_tiles_x,
                       num_tiles_y, num_files=-1):
+    """
+    Cuts all images in a directory into smaller tiles and saves them to a specified destination.
+
+    Args:
+        location (str): Path to the source directory.
+        destination (str): Path to the destination directory.
+        crop_width (int): Width of each cropped tile.
+        crop_height (int): Height of each cropped tile.
+        left_margin (int): Left margin for the cropping.
+        upper_margin (int): Upper margin for the cropping.
+        divisor (int): Gap size between the tiles.
+        num_tiles_x (int): Number of tiles in the horizontal direction.
+        num_tiles_y (int): Number of tiles in the vertical direction.
+        num_files (int, optional): Maximum number of tiles to save per image. Default is -1 (save all possible tiles).
+    """
     if not os.path.exists(destination):
         os.makedirs(destination)
     for address, dirs, files in os.walk(location):

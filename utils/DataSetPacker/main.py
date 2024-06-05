@@ -37,6 +37,16 @@ test_path = source + "/test-images"
 
 
 def load_directory(address, directory):
+    """
+    Loads images from a directory, optionally inverts their colors, and flattens them.
+
+    Args:
+        address (str): Path to the parent directory.
+        directory (str): Name of the subdirectory.
+
+    Returns:
+        list: List of flattened image arrays and their corresponding labels.
+    """
     images = []
     files = os.listdir(os.path.join(address, directory))
     for file in files:
@@ -50,6 +60,15 @@ def load_directory(address, directory):
 
 
 def load_classes(path, dirs, x, y):
+    """
+    Loads images and labels from multiple directories and appends them to provided lists.
+
+    Args:
+        path (str): Path to the parent directory.
+        dirs (list): List of subdirectories.
+        x (list): List to append image data.
+        y (list): List to append labels.
+    """
     for directory in dirs:
         result = load_directory(path, directory)
         x.extend(result[0])

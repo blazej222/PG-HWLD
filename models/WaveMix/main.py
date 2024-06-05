@@ -49,6 +49,7 @@ if custom_loader_train_path is None:
 if custom_loader_test_path is None:
     use_custom_test_loader = False
 
+
 class WaveMix(nn.Module):
     def __init__(
             self,
@@ -90,6 +91,9 @@ class WaveMix(nn.Module):
 
 
 class CustomDataset(VisionDataset):
+    """
+    This class makes it possible to load a custom dataset.
+    """
     def __init__(self, root, transform=None, train=True):
         super(CustomDataset, self).__init__(root, transform=transform)
         self.train = train
@@ -123,6 +127,7 @@ class CustomDataset(VisionDataset):
     def __len__(self):
         return len(self.file_list)
 
+
 model = WaveMix(
     num_classes=num_classes,
     depth=16,
@@ -132,7 +137,11 @@ model = WaveMix(
     dropout=0.5
 )
 
+
 def testOnly(model):
+    """
+    Test the model without training.
+    """
     correct_1 = 0
     correct_5 = 0
     c = 0
@@ -160,7 +169,8 @@ def testOnly(model):
     # Generate and display confusion matrix
     cm = confusion_matrix(all_labels, all_preds)
     plt.figure(figsize=(10, 8))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False, xticklabels=test_dataset.classes, yticklabels=test_dataset.classes)
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False, xticklabels=test_dataset.classes,
+                yticklabels=test_dataset.classes)
     plt.xlabel('Predicted')
     plt.ylabel('True')
     plt.title('Confusion Matrix - WaveMix')
@@ -218,7 +228,7 @@ if use_custom_test_loader:
     else:
         test_dataset = CustomDataset(custom_loader_test_path,
                                      transform=torchvision.transforms.Compose([
-                                         torchvision.transforms.RandomRotation([90,90]),
+                                         torchvision.transforms.RandomRotation([90, 90]),
                                          torchvision.transforms.RandomVerticalFlip(1.0),
                                          torchvision.transforms.ToTensor(),
                                          torchvision.transforms.Normalize((0.1307,), (0.3081,))
@@ -262,7 +272,7 @@ counter = 0
 
 if test_only:
     # load saved model
-    model.load_state_dict(torch.load(str(os.path.join(args.saved_model_path,args.model_filename))))
+    model.load_state_dict(torch.load(str(os.path.join(args.saved_model_path, args.model_filename))))
     testOnly(model)
     exit(0)
 
@@ -318,7 +328,8 @@ while counter < 20:  # Counter sets the number of epochs of non improvement befo
             correct_5 += top5_acc(outputs, labels)
             c += 1
 
-    print(f"Epoch : {epoch + 1} - Top 1: {correct_1 * 100 / c:.2f} - Top 5: {correct_5 * 100 / c:.2f} -  Train Time: {t1 - t0:.2f} - Test Time: {time.time() - t1:.2f}\n")
+    print(
+        f"Epoch : {epoch + 1} - Top 1: {correct_1 * 100 / c:.2f} - Top 5: {correct_5 * 100 / c:.2f} -  Train Time: {t1 - t0:.2f} - Test Time: {time.time() - t1:.2f}\n")
 
     top1.append(correct_1 * 100 / c)
     top5.append(correct_5 * 100 / c)
@@ -327,14 +338,14 @@ while counter < 20:  # Counter sets the number of epochs of non improvement befo
     counter += 1
     epoch += 1
     if float(correct_1 * 100 / c) >= float(max(top1)):
-        torch.save(model.state_dict(), str(os.path.join(args.saved_model_path,args.model_filename)))
+        torch.save(model.state_dict(), str(os.path.join(args.saved_model_path, args.model_filename)))
         print(1)
         counter = 0
 
 # Second Optimizer
 print('Training with SGD')
 
-model.load_state_dict(torch.load(str(os.path.join(args.saved_model_path,args.model_filename))))
+model.load_state_dict(torch.load(str(os.path.join(args.saved_model_path, args.model_filename))))
 optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
 while counter < 20:  # loop over the dataset multiple times
@@ -375,7 +386,8 @@ while counter < 20:  # loop over the dataset multiple times
             correct_5 += top5_acc(outputs, labels)
             c += 1
 
-    print(f"Epoch : {epoch + 1} - Top 1: {correct_1 * 100 / c:.2f} - Top 5: {correct_5 * 100 / c:.2f} -  Train Time: {t1 - t0:.2f} - Test Time: {time.time() - t1:.2f}\n")
+    print(
+        f"Epoch : {epoch + 1} - Top 1: {correct_1 * 100 / c:.2f} - Top 5: {correct_5 * 100 / c:.2f} -  Train Time: {t1 - t0:.2f} - Test Time: {time.time() - t1:.2f}\n")
 
     top1.append(correct_1 * 100 / c)
     top5.append(correct_5 * 100 / c)
@@ -384,10 +396,11 @@ while counter < 20:  # loop over the dataset multiple times
     counter += 1
     epoch += 1
     if float(correct_1 * 100 / c) >= float(max(top1)):
-        torch.save(model.state_dict(), str(os.path.join(args.saved_model_path,args.model_filename)))
+        torch.save(model.state_dict(), str(os.path.join(args.saved_model_path, args.model_filename)))
         print(1)
         counter = 0
 
 print('Finished Training')
 print("Results")
-print(f"Top 1 Accuracy: {max(top1):.2f} -Top 5 Accuracy : {max(top5):.2f} - Train Time: {min(traintime):.0f} -Test Time: {min(testtime):.0f}\n")
+print(
+    f"Top 1 Accuracy: {max(top1):.2f} -Top 5 Accuracy : {max(top5):.2f} - Train Time: {min(traintime):.0f} -Test Time: {min(testtime):.0f}\n")

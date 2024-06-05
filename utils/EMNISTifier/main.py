@@ -9,6 +9,18 @@ import argparse
 
 
 def EMNISTify(image, threshold, verbose=False):
+    """
+    Processes an image to resemble EMNIST format by inverting colors, thresholding,
+    blurring, cropping, centering, padding, and resizing.
+
+    Args:
+        image (numpy.ndarray): Input image in BGR format.
+        threshold (int): Threshold value for binary segmentation.
+        verbose (bool): If True, prints debug information.
+
+    Returns:
+        numpy.ndarray: Processed image in EMNIST format.
+    """
     # Invert the image (black on white to white on black)
     inverted = cv2.bitwise_not(image)
 
@@ -81,12 +93,32 @@ def EMNISTify(image, threshold, verbose=False):
 
 
 def EMNISTify_file(address, file, threshold, destination, location, verbose=False):
+    """
+    Processes a single image file to apply the EMNISTify transformation.
+
+    Args:
+        address (str): Directory of the image file.
+        file (str): Name of the image file.
+        threshold (int): Threshold value for binary segmentation.
+        destination (str): Path to the destination directory.
+        location (str): Path to the source directory.
+        verbose (bool): If True, prints debug information.
+    """
     image = cv2.imread(str(os.path.join(address, file)))
     processed_image = EMNISTify(image, threshold,verbose)
     cv2.imwrite(str(os.path.join(destination + address.replace(location, ''), file)), processed_image)
 
 
 def EMNISTify_catalog(location, destination, threshold=100, verbose=False):
+    """
+    Processes all image files in a directory to apply the EMNISTify transformation.
+
+    Args:
+        location (str): Path to the source directory.
+        destination (str): Path to the destination directory.
+        threshold (int, optional): Threshold value for binary segmentation. Default is 100.
+        verbose (bool, optional): If True, prints debug information. Default is False.
+    """
     if not os.path.exists(destination):
         os.makedirs(destination)
 
