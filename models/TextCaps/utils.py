@@ -90,7 +90,7 @@ def load_emnist_balanced(cnt, train_load_path, test_load_path):
     x_tr = np.asarray(x_tr)
     y_tr = np.asarray(y_tr)
     y_tr = to_categorical(y_tr.astype('float32'))
-    
-    print(x_tr.shape,y_tr.shape,x_test.shape,y_test.shape)
+
+    #print(x_tr.shape,y_tr.shape,x_test.shape,y_test.shape)
     return (x_tr, y_tr), (x_test, y_test), (x_train_test, y_train_test)
     #return (x_tr, y_tr), (x_test, y_test), (x_test, y_test)

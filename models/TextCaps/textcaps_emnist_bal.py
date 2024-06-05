@@ -1,3 +1,6 @@
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=UserWarning)
 import keras
 from keras import layers, models, optimizers
 from keras import backend as K
@@ -14,10 +17,10 @@ from utils import combine_images, load_emnist_balanced
 from PIL import Image, ImageFilter
 from capsulelayers import CapsuleLayer, PrimaryCap, Length, Mask
 from snapshot import SnapshotCallbackBuilder
-import os
 import numpy as np
 import tensorflow as tf
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import argparse
 from sklearn.metrics import confusion_matrix
 import seaborn as sns
@@ -152,8 +155,8 @@ def test(model, data, args):
     plt.xlabel('Predicted')
     plt.ylabel('True')
     plt.title('Confusion Matrix - TextCaps')
-    plt.savefig('Confusion Matrix - TextCaps.png')
-    plt.show()
+    plt.savefig(f'Confusion Matrix - TextCaps-{cmsuffix}.png')
+    # plt.show()
     
 class dataGeneration():
     def __init__(self, model,data,args,samples_to_generate = 2):
@@ -456,12 +459,16 @@ if __name__ == "__main__":
                         help="The path of the saved weights. Should be specified when testing")
     parser.add_argument('-t', '--test', action='store_true',
                         help="Whether we should test the model without training. Weights must be specified.")
-    parser.add_argument('--train_path', required=True,
+    parser.add_argument('--train_path',
                         help="Path to the training dataset")
     parser.add_argument('--test_path', required=True,
                         help="Path to the testing dataset")
+    parser.add_argument('--cmsuffix', default='',
+                        help="Additional suffix added to image filenames of confusion matrix.")
     args = parser.parse_args()
-    print(args)
+    cmsuffix = args.cmsuffix
+    if args.verbose:
+        print(args)
 
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
@@ -494,8 +501,11 @@ if __name__ == "__main__":
         else:
             test(model=eval_model, data=(x_test, y_test), args=args)
     elif not args.data_generate:
+        if args.train_path is not None:
             train(model=model, data=((x_train, y_train), (x_train_test, y_train_test)), args=args)
             test(model=eval_model, data=(x_test, y_test), args=args)
+        else:
+            print("Training path was not specified. You need to specify training path.")
         
     else:
         if args.weights is None:
