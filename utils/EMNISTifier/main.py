@@ -50,6 +50,7 @@ def EMNISTify(image, threshold, verbose=False):
     left_border = 0
     right_border = 0
 
+    # Fit into a square if not ROI was not even-sided
     if w > h:
         to_add = w - h
         top_border = to_add // 2
@@ -138,14 +139,14 @@ def EMNISTify_catalog(location, destination, threshold=100, verbose=False):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Apply image modifications to each sample to make it more similiar to EMNIST.')
+    parser = argparse.ArgumentParser(description='Apply the EMNIST image processing steps to each sample.')
     parser.add_argument('--source', type=str, required=True,
                         help='Dataset source directory.')
     parser.add_argument('--destination', type=str, required=True,
                         help='Processed dataset destination directory.')
     parser.add_argument('--threshold', type=int, default=100,
                         help='Threshold value.')
-    parser.add_argument('--verbose', type=bool, action='store_true', default=False,
+    parser.add_argument('--verbose', type=bool, default=False,
                         help='Print debug info.')
     args = parser.parse_args()
 
@@ -155,7 +156,7 @@ def main():
     verbose = args.verbose
     start = time()
 
-    EMNISTify_catalog(location,destination, threshold,verbose)
+    EMNISTify_catalog(location, destination, threshold, verbose)
 
     end = time()
     print(f"Finished in {end - start}")
