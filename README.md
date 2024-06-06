@@ -20,8 +20,8 @@ The following dataset formats are being used in the project:
 
 - `idx-ubyte` - binary files containing encoded labels and dataset images.
 - `.mat` - dataset images and labels stored inside matlab file.
-- `extracted` - dataset images extracted into `train` and `test` directories, with separate directories for each class.
-Example - letter `a` sample used for training can be stored as `train/a/xxxx.png`.
+- `extracted` - dataset images extracted into `train-images` and `test-images` directories, with separate directories for each class.
+Example - letter `a` sample used for training can be stored as `train-images/a/xxxx.png`.
 - `extracted_undivided` - same as above but samples aren't divided into `train` and `test` directories.
 
 ## Getting started

@@ -1,5 +1,5 @@
 $OurDatasetExtractedPath = "../../resources/datasets/dataset-processed/test-images"
-$OurDatasetMatPath = "../../resources/datasets/packed/dataset-processed/dataset-processed.mat"
+$OurDatasetMatPath = "../../resources/datasets/packed/dataset-processed-old/dataset-processed.mat"
 $EMNISTMatPath = "../../resources/datasets/dataset-EMNIST-mat/emnist-letters.mat"
 Write-Output "Started Testing"
 ../resources/python/venv/Scripts/activate.ps1
@@ -67,4 +67,4 @@ python textcaps_emnist_bal.py --test --weights ./saved_models/emnist_letters_560
 Write-Output "`nTextcaps end result run3 emnist"
 python textcaps_emnist_bal.py --test --weights ./saved_models/emnist_letters_5600_run3/trained_model.h5 --test_path $EMNISTMatPath --cmsuffix emnist_3
 deactivate
-cd ../..
+cd ../../scripts

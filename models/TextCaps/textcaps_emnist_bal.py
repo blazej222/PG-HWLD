@@ -478,7 +478,7 @@ if __name__ == "__main__":
     model, eval_model = CapsNet(input_shape=x_train.shape[1:],
                                                   n_class=len(np.unique(np.argmax(y_train, 1))),
                                                   routings=args.routings)
-    if (args.verbose):
+    if args.verbose:
         model.summary()
 
     """
