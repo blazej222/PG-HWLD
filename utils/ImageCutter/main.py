@@ -105,9 +105,9 @@ def main():
     source = args.source
     destination = args.destination
     left_margin = args.left_margin
-    upper_margin = args
+    upper_margin = args.upper_margin
     crop_width = args.crop_width
-    crop_height = args
+    crop_height = args.crop_height
     divisor = args.divisor
     num_tiles_x = args.num_tiles_x
     num_tiles_y = args.num_tiles_y
