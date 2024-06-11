@@ -26,6 +26,21 @@ def get_batch_size(
     max_batch_size: int = None,
     num_iterations: int = 5,
 ) -> int:
+    """
+    Determine the optimal batch size that fits the model and dataset within memory constraints.
+
+    Args:
+        model (nn.Module): The neural network model.
+        device (torch.device): Device where the model will be placed.
+        input_shape (t.Tuple[int, int, int]): Shape of input data.
+        output_shape (t.Tuple[int]): Shape of output data.
+        dataset_size (int): Total size of the dataset.
+        max_batch_size (int, optional): Maximum batch size allowed. Defaults to None.
+        num_iterations (int, optional): Number of iterations for testing each batch size. Defaults to 5.
+
+    Returns:
+        int: Optimal batch size.
+    """
     model.to(device)
     model.train(True)
     optimizer = torch.optim.Adam(model.parameters())
@@ -63,6 +78,17 @@ def get_batch_size(
 
 
 def get_datasets(batch_size: int, num_workers: int = 2):
+    """
+    Prepare train and test datasets.
+
+    Args:
+        batch_size (int): Batch size for data loading.
+        num_workers (int, optional): Number of worker processes for data loading. Defaults to 2.
+
+    Returns:
+        DataLoader: Train dataset loader.
+        DataLoader: Test dataset loader.
+    """
     train_ds = DataLoader(
         datasets.FakeData(
             size=DATASET_SIZE,
@@ -88,6 +114,9 @@ def get_datasets(batch_size: int, num_workers: int = 2):
 
 
 class ResNet(nn.Module):
+    """
+    Custom ResNet model.
+    """
     def __init__(self):
         super(ResNet, self).__init__()
         self.resnet = resnet50(weights=ResNet50_Weights.DEFAULT)
@@ -98,6 +127,15 @@ class ResNet(nn.Module):
         )
 
     def forward(self, inputs: torch.Tensor):
+        """
+        Forward pass of the model.
+
+        Args:
+            inputs (torch.Tensor): Input data.
+
+        Returns:
+            torch.Tensor: Model output.
+        """
         outputs = self.resnet(inputs)
         outputs = self.output_layer(outputs)
         return outputs
@@ -109,6 +147,18 @@ def train(
     train_ds: DataLoader,
     device: torch.device,
 ):
+    """
+    Train the model.
+
+    Args:
+        model (nn.Module): The neural network model.
+        optimizer (torch.optim): Optimizer for training.
+        train_ds (DataLoader): Train dataset loader.
+        device (torch.device): Device where the model will be placed.
+
+    Returns:
+        dict: Training statistics.
+    """
     model.train()
     train_loss, correct = 0, 0
     for batch_idx, (data, target) in enumerate(tqdm(train_ds, desc="Train")):
@@ -128,6 +178,17 @@ def train(
 
 
 def test(model: nn.Module, test_ds: DataLoader, device: torch.device):
+    """
+    Test the model.
+
+    Args:
+        model (nn.Module): The neural network model.
+        test_ds (DataLoader): Test dataset loader.
+        device (torch.device): Device where the model will be placed.
+
+    Returns:
+        dict: Testing statistics.
+    """
     with torch.no_grad():
         model.eval()
         test_loss, correct = 0, 0
@@ -144,6 +205,12 @@ def test(model: nn.Module, test_ds: DataLoader, device: torch.device):
 
 
 def main(epochs: int = 2):
+    """
+    Main function to run training and testing.
+
+    Args:
+        epochs (int, optional): Number of epochs to train. Defaults to 2.
+    """
     if not torch.cuda.is_available():
         raise RuntimeError("CUDA is not available.")
 

@@ -5,9 +5,22 @@ import numpy as np
 import matplotlib.pyplot as plt
 import multiprocessing as mp
 from time import time
+import argparse
 
 
 def EMNISTify(image, threshold, verbose=False):
+    """
+    Processes an image to resemble EMNIST format by inverting colors, thresholding,
+    blurring, cropping, centering, padding, and resizing.
+
+    Args:
+        image (numpy.ndarray): Input image in BGR format.
+        threshold (int): Threshold value for binary segmentation.
+        verbose (bool): If True, prints debug information.
+
+    Returns:
+        numpy.ndarray: Processed image in EMNIST format.
+    """
     # Invert the image (black on white to white on black)
     inverted = cv2.bitwise_not(image)
 
@@ -37,6 +50,7 @@ def EMNISTify(image, threshold, verbose=False):
     left_border = 0
     right_border = 0
 
+    # Fit into a square if not ROI was not even-sided
     if w > h:
         to_add = w - h
         top_border = to_add // 2
@@ -80,12 +94,32 @@ def EMNISTify(image, threshold, verbose=False):
 
 
 def EMNISTify_file(address, file, threshold, destination, location, verbose=False):
-    image = cv2.imread(os.path.join(address, file))
+    """
+    Processes a single image file to apply the EMNISTify transformation.
+
+    Args:
+        address (str): Directory of the image file.
+        file (str): Name of the image file.
+        threshold (int): Threshold value for binary segmentation.
+        destination (str): Path to the destination directory.
+        location (str): Path to the source directory.
+        verbose (bool): If True, prints debug information.
+    """
+    image = cv2.imread(str(os.path.join(address, file)))
     processed_image = EMNISTify(image, threshold,verbose)
-    cv2.imwrite(os.path.join(destination + address.replace(location, ''), file), processed_image)
+    cv2.imwrite(str(os.path.join(destination + address.replace(location, ''), file)), processed_image)
 
 
 def EMNISTify_catalog(location, destination, threshold=100, verbose=False):
+    """
+    Processes all image files in a directory to apply the EMNISTify transformation.
+
+    Args:
+        location (str): Path to the source directory.
+        destination (str): Path to the destination directory.
+        threshold (int, optional): Threshold value for binary segmentation. Default is 100.
+        verbose (bool, optional): If True, prints debug information. Default is False.
+    """
     if not os.path.exists(destination):
         os.makedirs(destination)
 
@@ -105,16 +139,24 @@ def EMNISTify_catalog(location, destination, threshold=100, verbose=False):
 
 
 def main():
+    parser = argparse.ArgumentParser(description='Apply the EMNIST image processing steps to each sample.')
+    parser.add_argument('--source', type=str, required=True,
+                        help='Dataset source directory.')
+    parser.add_argument('--destination', type=str, required=True,
+                        help='Processed dataset destination directory.')
+    parser.add_argument('--threshold', type=int, default=100,
+                        help='Threshold value.')
+    parser.add_argument('--verbose', type=bool, default=False,
+                        help='Print debug info.')
+    args = parser.parse_args()
+
+    location = args.source
+    destination = args.destination
+    threshold = args.threshold
+    verbose = args.verbose
     start = time()
 
-    # TEST RUN
-    input_image = cv2.imread("../../resources/uploaded-images/z.png")
-    # EMNISTify_catalog("../../resources/uploaded-images", "../../resources/processed-images", threshold=100, verbose=True)
-
-    EMNISTify_catalog("../../resources/datasets/unpacked/dataset-multi-person",
-                      f"../../resources/datasets/processed/dataset-processed", threshold=100)
-    EMNISTify_catalog("../../resources/datasets/unpacked/dataset-single-person",
-                      f"../../resources/datasets/processed/dataset-processed", threshold=100)
+    EMNISTify_catalog(location, destination, threshold, verbose)
 
     end = time()
     print(f"Finished in {end - start}")

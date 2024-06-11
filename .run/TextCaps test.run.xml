@@ -15,7 +15,7 @@
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/models/TextCaps/textcaps_emnist_bal.py" />
-    <option name="PARAMETERS" value="--test --weights ./saved_models/emnist_letters_5600/trained_model.h5 --train_path ../../resources/datasets/dataset-EMNIST-mat/emnist-letters.mat --test_path ../../resources/datasets/packed/dataset-processed/dataset-processed.mat" />
+    <option name="PARAMETERS" value="--test --weights ./saved_models/emnist_letters_5600_run1/trained_model.h5 --train_path ../../resources/datasets/dataset-EMNIST-mat/emnist-letters.mat --test_path ../../resources/datasets/packed/dataset-processed/dataset-processed.mat" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />

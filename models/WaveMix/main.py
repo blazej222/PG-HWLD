@@ -15,6 +15,9 @@ from torchsummary import summary
 from torchvision.datasets import VisionDataset
 from tqdm import tqdm
 import argparse
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # use GPU
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -30,6 +33,10 @@ parser.add_argument('--saved_model_path', default='./saved_models',
                     help="Path to directory containing saved model weights. Weights from training will be saved there")
 parser.add_argument('--model_filename', default='model.pth',
                     help="Weights filename")
+parser.add_argument('--cmsuffix', default='',
+                    help="Additional suffix added to image filenames of confusion matrix.")
+parser.add_argument('--verbose', action='store_true', default=False,
+                    help="Whether additional debug information should be printed.")
 args = parser.parse_args()
 
 num_classes = 27
@@ -40,11 +47,14 @@ use_custom_test_loader = True
 custom_loader_test_path = args.test_path
 custom_loader_train_path = args.train_path
 test_only = args.test
+cmsuffix = args.cmsuffix
+debug_print = args.verbose
 
 if custom_loader_train_path is None:
     use_custom_train_loader = False
 if custom_loader_test_path is None:
     use_custom_test_loader = False
+
 
 class WaveMix(nn.Module):
     def __init__(
@@ -87,6 +97,9 @@ class WaveMix(nn.Module):
 
 
 class CustomDataset(VisionDataset):
+    """
+    This class makes it possible to load a custom dataset.
+    """
     def __init__(self, root, transform=None, train=True):
         super(CustomDataset, self).__init__(root, transform=transform)
         self.train = train
@@ -120,6 +133,7 @@ class CustomDataset(VisionDataset):
     def __len__(self):
         return len(self.file_list)
 
+
 model = WaveMix(
     num_classes=num_classes,
     depth=16,
@@ -129,52 +143,55 @@ model = WaveMix(
     dropout=0.5
 )
 
+
 def testOnly(model):
+    """
+    Test the model without training.
+    """
     correct_1 = 0
     correct_5 = 0
     c = 0
+    all_preds = []
+    all_labels = []
+
     print("Entering testing mode")
     model.eval()
     with torch.no_grad():
         for data in test_loader:
             images, labels = data[0].to(device), data[1].to(device)
             outputs = model(images)
+
+            # Collect all predictions and labels
+            _, preds = torch.max(outputs, 1)
+            all_preds.extend(preds.cpu().numpy())
+            all_labels.extend(labels.cpu().numpy())
+
             correct_1 += top1_acc(outputs, labels)
             correct_5 += top5_acc(outputs, labels)
             c += 1
 
     print(f"Top 1: {correct_1 * 100 / c:.2f} - Top 5: {correct_5 * 100 / c:.2f}\n")
 
+    # Generate and display confusion matrix
+    cm = confusion_matrix(all_labels, all_preds)
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False, xticklabels=test_dataset.classes,
+                yticklabels=test_dataset.classes)
+    plt.xlabel('Predicted')
+    plt.ylabel('True')
+    plt.title('Confusion Matrix - WaveMix')
+    plt.savefig(f'Confusion Matrix - WaveMix - {cmsuffix}.png')
+    # plt.show()
+
 
 model.to(device)
 # summary
-print(summary(model, (1, 28, 28)))
-print(torch.cuda.get_device_properties(device))
+if debug_print:
+    print(summary(model, (1, 28, 28)))
+    print(torch.cuda.get_device_properties(device))
 
 # set batch size according to GPU
 batch_size = 256
-
-# transforms taken from the CIFAR10 example
-# transform_train = transforms.Compose(
-#     [transforms.RandomHorizontalFlip(p=0.5),
-#      transforms.TrivialAugmentWide(),
-#      transforms.ToTensor(),
-#      transforms.Normalize(0.5, 0.25)])
-#
-# transform_test = transforms.Compose(
-#     [transforms.ToTensor(),
-#      transforms.Normalize(0.5, 0.25)])
-
-# Loading the dataset with torchvision.datasets
-# trainset = torchvision.datasets.EMNIST(root='../../resources/datasets/archives', split='letters', train=True,
-#                                        download=True, transform=transform_train)
-# train_loader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2, pin_memory=True,
-#                                           prefetch_factor=2, persistent_workers=2)
-#
-# testset = torchvision.datasets.EMNIST(root='../../resources/datasets/archives', split='letters', train=False,
-#                                       download=True, transform=transform_test)
-# test_loader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=2, pin_memory=True,
-#                                          prefetch_factor=2, persistent_workers=2)
 
 if use_custom_train_loader:
 
@@ -185,9 +202,9 @@ if use_custom_train_loader:
                                       torchvision.transforms.ToTensor(),
                                       torchvision.transforms.Normalize((0.1307,), (0.3081,))
                                   ]), train=True)
-
-    print(f"Number of train classes: {len(train_dataset.classes)}")
-    print(train_dataset.classes)
+    if debug_print:
+        print(f"Number of train classes: {len(train_dataset.classes)}")
+        print(train_dataset.classes)
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
@@ -203,8 +220,9 @@ else:
                                     ])),
         batch_size=batch_size, shuffle=True)
     train_dataset = train_loader.dataset
-    print(f"Number of train classes: {len(train_dataset.classes)}")
-    print(train_dataset.classes)
+    if debug_print:
+        print(f"Number of train classes: {len(train_dataset.classes)}")
+        print(train_dataset.classes)
 
 if use_custom_test_loader:
 
@@ -218,14 +236,14 @@ if use_custom_test_loader:
     else:
         test_dataset = CustomDataset(custom_loader_test_path,
                                      transform=torchvision.transforms.Compose([
-                                         torchvision.transforms.RandomRotation([90,90]),
+                                         torchvision.transforms.RandomRotation([90, 90]),
                                          torchvision.transforms.RandomVerticalFlip(1.0),
                                          torchvision.transforms.ToTensor(),
                                          torchvision.transforms.Normalize((0.1307,), (0.3081,))
                                      ]), train=False)
-
-    print(f"Number of test classes: {len(test_dataset.classes)}")
-    print(test_dataset.classes)
+    if debug_print:
+        print(f"Number of test classes: {len(test_dataset.classes)}")
+        print(test_dataset.classes)
 
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
 
@@ -239,8 +257,9 @@ else:
                                     ])),
         batch_size=batch_size, shuffle=True)
     test_dataset = test_loader.dataset
-    print(f"Number of test classes: {len(test_dataset.classes)}")
-    print(test_dataset.classes)
+    if debug_print:
+        print(f"Number of test classes: {len(test_dataset.classes)}")
+        print(test_dataset.classes)
 
 # Loading the dataset from our own files
 
@@ -262,7 +281,7 @@ counter = 0
 
 if test_only:
     # load saved model
-    model.load_state_dict(torch.load(os.path.join(args.saved_model_path,args.model_filename)))
+    model.load_state_dict(torch.load(str(os.path.join(args.saved_model_path, args.model_filename))))
     testOnly(model)
     exit(0)
 
@@ -318,7 +337,8 @@ while counter < 20:  # Counter sets the number of epochs of non improvement befo
             correct_5 += top5_acc(outputs, labels)
             c += 1
 
-    print(f"Epoch : {epoch + 1} - Top 1: {correct_1 * 100 / c:.2f} - Top 5: {correct_5 * 100 / c:.2f} -  Train Time: {t1 - t0:.2f} - Test Time: {time.time() - t1:.2f}\n")
+    print(
+        f"Epoch : {epoch + 1} - Top 1: {correct_1 * 100 / c:.2f} - Top 5: {correct_5 * 100 / c:.2f} -  Train Time: {t1 - t0:.2f} - Test Time: {time.time() - t1:.2f}\n")
 
     top1.append(correct_1 * 100 / c)
     top5.append(correct_5 * 100 / c)
@@ -327,14 +347,14 @@ while counter < 20:  # Counter sets the number of epochs of non improvement befo
     counter += 1
     epoch += 1
     if float(correct_1 * 100 / c) >= float(max(top1)):
-        torch.save(model.state_dict(), os.path.join(args.saved_model_path,args.model_filename))
+        torch.save(model.state_dict(), str(os.path.join(args.saved_model_path, args.model_filename)))
         print(1)
         counter = 0
 
 # Second Optimizer
 print('Training with SGD')
 
-model.load_state_dict(torch.load(os.path.join(args.saved_model_path,args.model_filename)))
+model.load_state_dict(torch.load(str(os.path.join(args.saved_model_path, args.model_filename))))
 optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
 while counter < 20:  # loop over the dataset multiple times
@@ -375,7 +395,8 @@ while counter < 20:  # loop over the dataset multiple times
             correct_5 += top5_acc(outputs, labels)
             c += 1
 
-    print(f"Epoch : {epoch + 1} - Top 1: {correct_1 * 100 / c:.2f} - Top 5: {correct_5 * 100 / c:.2f} -  Train Time: {t1 - t0:.2f} - Test Time: {time.time() - t1:.2f}\n")
+    print(
+        f"Epoch : {epoch + 1} - Top 1: {correct_1 * 100 / c:.2f} - Top 5: {correct_5 * 100 / c:.2f} -  Train Time: {t1 - t0:.2f} - Test Time: {time.time() - t1:.2f}\n")
 
     top1.append(correct_1 * 100 / c)
     top5.append(correct_5 * 100 / c)
@@ -384,10 +405,11 @@ while counter < 20:  # loop over the dataset multiple times
     counter += 1
     epoch += 1
     if float(correct_1 * 100 / c) >= float(max(top1)):
-        torch.save(model.state_dict(), os.path.join(args.saved_model_path,args.model_filename))
+        torch.save(model.state_dict(), str(os.path.join(args.saved_model_path, args.model_filename)))
         print(1)
         counter = 0
 
 print('Finished Training')
 print("Results")
-print(f"Top 1 Accuracy: {max(top1):.2f} -Top 5 Accuracy : {max(top5):.2f} - Train Time: {min(traintime):.0f} -Test Time: {min(testtime):.0f}\n")
+print(
+    f"Top 1 Accuracy: {max(top1):.2f} -Top 5 Accuracy : {max(top5):.2f} - Train Time: {min(traintime):.0f} -Test Time: {min(testtime):.0f}\n")

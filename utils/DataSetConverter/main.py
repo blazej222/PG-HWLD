@@ -2,9 +2,20 @@ import struct
 import numpy as np
 from PIL import Image
 import os
+import argparse
 
 
 def array_to_images(imageFileName, location):
+    """
+    Converts an array of images to actual image files.
+
+    Args:
+    - imageFileName (str): The file name of the array of images.
+    - location (str): The directory where the images will be saved.
+
+    Returns:
+    - numImages (int): Number of images processed.
+    """
     imageFile = open(imageFileName, 'rb')
     buf = imageFile.read()
 
@@ -41,6 +52,17 @@ def array_to_images(imageFileName, location):
 
 
 def array_to_images_sorted(imageFileName, location, labelFileName):
+    """
+    Converts an array of images to actual image files sorted into labeled folders.
+
+    Args:
+    - imageFileName (str): The file name of the array of images.
+    - location (str): The directory where the images will be saved.
+    - labelFileName (str): The file name containing labels for the images.
+
+    Returns:
+    - numImages (int): Number of images processed.
+    """
     imageFile = open(imageFileName, 'rb')
     buf = imageFile.read()
 
@@ -90,6 +112,14 @@ def array_to_images_sorted(imageFileName, location, labelFileName):
 
 
 def labelFile_to_txt(labelFileName, outputFileName, numImages):
+    """
+    Converts a label file to a text file.
+
+    Args:
+    - labelFileName (str): The file name containing labels.
+    - outputFileName (str): The output file name for the converted labels.
+    - numImages (int): Number of labels to process.
+    """
     labelFile = open(labelFileName, 'rb')
     labelFile.read(8)  # discard header info
     labelArray = np.array([], dtype='uint8')
@@ -103,6 +133,16 @@ def labelFile_to_txt(labelFileName, outputFileName, numImages):
 
 
 def txt_labelFile_to_array(txtFileName, numImages):
+    """
+    Converts a text file containing labels to a numpy array.
+
+    Args:
+    - txtFileName (str): The file name containing labels.
+    - numImages (int): Number of labels to process.
+
+    Returns:
+    - labelArray (numpy.array): Numpy array containing labels.
+    """
     txtFile = open(txtFileName, 'rb')
     labelArray = np.array([], dtype=int)
 
@@ -115,16 +155,19 @@ def txt_labelFile_to_array(txtFileName, numImages):
 
 
 def main():
-    filename = "../../resources/datasets/archives/EMNIST-binary/emnist-letters-train-images-idx3-ubyte"
-    labelFile = "../../resources/datasets/archives/EMNIST-binary/emnist-letters-train-labels-idx1-ubyte"
-    location = "../../resources/datasets/dataset-EMNIST/train-images"
-    #array_to_images_sorted(filename, location, labelFile)
+    parser = argparse.ArgumentParser(
+        description='Convert dataset from idx3-ubyte format to extracted_undivided format.')
+    parser.add_argument('--source_dataset', type=str, required=True,
+                        help='Dataset source file in idx3-ubyte format.')
+    parser.add_argument('--source_labels', type=str, required=True,
+                        help='Labels file in idx1-ubyte format.')
+    parser.add_argument('--destination', type=str, required=True,
+                        help='Dataset destination directory.')
+    args = parser.parse_args()
 
-    filename = "../../resources/datasets/archives/EMNIST-binary/emnist-letters-test-images-idx3-ubyte"
-    labelFile = "../../resources/datasets/archives/EMNIST-binary/emnist-letters-test-labels-idx1-ubyte"
-    location = "../../resources/datasets/dataset-EMNIST/test-images"
-    #numImages = array_to_images(filename, location)
-    #labelFile_to_txt(labelFile, "../../resources/datasets/dataset-EMNIST/test-labels.txt", numImages)
+    filename = args.source_dataset
+    labelFile = args.source_labels
+    location = args.destination
     array_to_images_sorted(filename, location, labelFile)
 
 

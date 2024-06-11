@@ -1,12 +1,25 @@
-import ntpath
 import os
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import multiprocessing as mp
 from time import time
+import argparse
+
 
 def crop_black_letter(image, margin, threshold):
+    """
+    Detects the contour of a dark object on a white background, crops it with a margin,
+    and returns the cropped image. If necessary, it centers the object in a new image.
+
+    Args:
+        image (numpy.ndarray): Input image in BGR format.
+        margin (int): Margin to add around the cropped object.
+        threshold (int): Threshold value for binary segmentation.
+
+    Returns:
+        numpy.ndarray: Cropped image with the object centered.
+    """
     # Invert the image (black on white to white on black)
     inverted = cv2.bitwise_not(image)
 
@@ -15,7 +28,6 @@ def crop_black_letter(image, margin, threshold):
 
     # Threshold the image to get a binary mask
     _, thresholded = cv2.threshold(gray, threshold, 255, cv2.THRESH_BINARY)
-    cv2.imwrite("C:/Users/Pingwin/Desktop/tmp.png", thresholded)
 
     # Find the non-zero pixels in the thresholded image
     points = cv2.findNonZero(thresholded)
@@ -51,7 +63,7 @@ def crop_black_letter(image, margin, threshold):
         for i in range(0, w):
             for j in range(0, h):
                 if 0 < x + i < image.shape[0] and 0 < y + j < image.shape[1]:
-                    newImage[j][i] = image[y+j][x+i]
+                    newImage[j][i] = image[y + j][x + i]
                 else:
                     newImage[j][i] = 255
         cropped = newImage
@@ -60,7 +72,6 @@ def crop_black_letter(image, margin, threshold):
         cropped = image[y:y + h, x:x + w]
 
     if cropped.shape[0] != cropped.shape[1]:
-        # if this executes I suck
         print(cropped.shape)
         print(w, h)
         imgplot = plt.imshow(cropped)
@@ -68,13 +79,34 @@ def crop_black_letter(image, margin, threshold):
 
     return cropped
 
-def crop_black_letters_file(address,file,margin,threshold,destination,location):
-    image = cv2.imread(os.path.join(address, file))
+
+def crop_black_letters_file(address, file, margin, threshold, destination, location):
+    """
+    Processes a single image file to detect and crop a dark object on a white background.
+
+    Args:
+        address (str): Directory of the image file.
+        file (str): Name of the image file.
+        margin (int): Margin to add around the cropped object.
+        threshold (int): Threshold value for binary segmentation.
+        destination (str): Path to the destination directory.
+        location (str): Path to the source directory.
+    """
+    image = cv2.imread(str(os.path.join(address, file)))
     cropped_image = crop_black_letter(image, margin, threshold)
-    cv2.imwrite(os.path.join(destination + address.replace(location, ''), file), cropped_image)
+    cv2.imwrite(str(os.path.join(destination + address.replace(location, ''), file)), cropped_image)
 
 
 def crop_black_letters_catalog(location, destination, margin=0, threshold=100):
+    """
+    Processes all image files in a directory to detect and crop dark objects on white backgrounds.
+
+    Args:
+        location (str): Path to the source directory.
+        destination (str): Path to the destination directory.
+        margin (int, optional): Margin to add around the cropped objects. Default is 0.
+        threshold (int, optional): Threshold value for binary segmentation. Default is 100.
+    """
     if not os.path.exists(destination):
         os.makedirs(destination)
 
@@ -86,7 +118,8 @@ def crop_black_letters_catalog(location, destination, margin=0, threshold=100):
                 os.makedirs(os.path.join(temp, directory))
 
         pool = mp.Pool()
-        pool.starmap_async(crop_black_letters_file,[(address,x,margin,threshold,destination,location) for x in files])
+        pool.starmap_async(crop_black_letters_file,
+                           [(address, x, margin, threshold, destination, location) for x in files])
         pool.close()
         pool.join()
 
@@ -94,23 +127,33 @@ def crop_black_letters_catalog(location, destination, margin=0, threshold=100):
 
 
 def main():
-    margin = 50
+    parser = argparse.ArgumentParser(
+        description='Detect contour of dark image on white background, '
+                    'center it and add white margin to image from dataset.')
+    parser.add_argument('--source', type=str, required=True,
+                        help='Dataset source directory.')
+    parser.add_argument('--destination', type=str, required=True,
+                        help='Processed dataset destination directory.')
+    parser.add_argument('--margin', type=int, required=True,
+                        help='Cropping margin.')
+    parser.add_argument('--threshold', type=int, default=100,
+                        help='Image threshold.')
+    args = parser.parse_args()
+
+    margin = args.margin
+    threshold = args.threshold
+    location = args.source
+    destination = args.destination + f"-{margin}"
     start = time()
 
-    #TODO: Add cropped directory
+    # TODO: Add cropped directory
 
-    # TEST RUN
-    # input_image = cv2.imread("../../resources/uploaded-images/z.png")
-    # cv2.imwrite("../../resources/uploaded-images/z-cropped.png", img=crop_black_letter(input_image, margin, threshold=10))
-    # crop_black_letters_catalog("../../resources/uploaded-images", "../../resources/preprocessed-images", margin, threshold=100)
-
-    crop_black_letters_catalog("../../resources/datasets/unpacked/dataset-multi-person",
-                              f"../../resources/datasets/unpacked/dataset-multi-person-cropped-{margin}", margin, threshold=100)
-    crop_black_letters_catalog("../../resources/datasets/unpacked/dataset-single-person",
-                              f"../../resources/datasets/unpacked/dataset-single-person-cropped-{margin}", margin, threshold=100)
+    crop_black_letters_catalog(location,
+                               destination, margin, threshold)
 
     end = time()
-    print(f"Finished in {end-start}")
+    print(f"Finished in {end - start}")
+
 
 if __name__ == '__main__':
     main()

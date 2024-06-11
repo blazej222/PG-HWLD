@@ -1,19 +1,27 @@
 import ntpath
 import os
 import datetime
-
+import argparse
 from PIL import Image
-
-
-# TOP MARGIN: 188
-# LEFT MARGIN: 64
-
-# W: 187
-# H: 187
 
 
 def cut_image(image_path, destination, crop_width, crop_height, left_margin, upper_margin, divisor, num_tiles_x,
               num_tiles_y, num_files):
+    """
+       Cuts an image into smaller tiles and saves them to a specified destination.
+
+       Args:
+           image_path (str): Path to the input image.
+           destination (str): Path to the destination directory.
+           crop_width (int): Width of each cropped tile.
+           crop_height (int): Height of each cropped tile.
+           left_margin (int): Left margin for the cropping.
+           upper_margin (int): Upper margin for the cropping.
+           divisor (int): Gap size between the tiles.
+           num_tiles_x (int): Number of tiles in the horizontal direction.
+           num_tiles_y (int): Number of tiles in the vertical direction.
+           num_files (int): Maximum number of tiles to save. If -1, save all possible tiles.
+       """
     image = Image.open(image_path)
     subdirectory = destination + f"/{ntpath.basename(image_path)[0]}"
     if not os.path.exists(subdirectory):
@@ -36,13 +44,29 @@ def cut_image(image_path, destination, crop_width, crop_height, left_margin, upp
 
             # Save the cropped image
             cropped_image.save(
-                subdirectory + f"/{ntpath.basename(image_path)[0]}_{y * num_tiles_x + x + 1}_{hash(image_path + f'/{ntpath.basename(image_path)[0]}')}.png")
+                subdirectory + f"/{ntpath.basename(image_path)[0]}_{y * num_tiles_x + x + 1}"
+                               f"_{hash(image_path + f'/{ntpath.basename(image_path)[0]}')}.png")
 
     print(f"Image division for {ntpath.basename(image_path)[0]} completed successfully.")
 
 
 def cut_image_catalog(location, destination, crop_width, crop_height, left_margin, upper_margin, divisor, num_tiles_x,
                       num_tiles_y, num_files=-1):
+    """
+    Cuts all images in a directory into smaller tiles and saves them to a specified destination.
+
+    Args:
+        location (str): Path to the source directory.
+        destination (str): Path to the destination directory.
+        crop_width (int): Width of each cropped tile.
+        crop_height (int): Height of each cropped tile.
+        left_margin (int): Left margin for the cropping.
+        upper_margin (int): Upper margin for the cropping.
+        divisor (int): Gap size between the tiles.
+        num_tiles_x (int): Number of tiles in the horizontal direction.
+        num_tiles_y (int): Number of tiles in the vertical direction.
+        num_files (int, optional): Maximum number of tiles to save per image. Default is -1 (save all possible tiles).
+    """
     if not os.path.exists(destination):
         os.makedirs(destination)
     for address, dirs, files in os.walk(location):
@@ -52,20 +76,45 @@ def cut_image_catalog(location, destination, crop_width, crop_height, left_margi
 
 
 def main():
-    source_image_arrays_path_mp1 = "../../resources/datasets/archives/scans-multi-person-1"
-    source_image_arrays_path_mp2 = "../../resources/datasets/archives/scans-multi-person-2"
-    source_image_arrays_path_sp = "../../resources/datasets/archives/scans-single-person"
-    destination_images_path_mp = "../../resources/datasets/unpacked/dataset-multi-person"
-    destination_images_path_sp = "../../resources/datasets/unpacked/dataset-single-person"
 
-    cut_image_catalog(source_image_arrays_path_mp1, destination_images_path_mp, crop_width=196, crop_height=196,
-                      left_margin=36, upper_margin=48, divisor=5, num_tiles_x=12, num_tiles_y=17, num_files=124)
+    parser = argparse.ArgumentParser(
+        description='Divide previously fitted scans of letter sheets collected as part of '
+                    'collecting datasets into a rectangular grid.')
+    parser.add_argument('--source', type=str, required=True,
+                        help='Dataset source directory.')
+    parser.add_argument('--destination', type=str, required=True,
+                        help='Processed dataset destination directory.')
+    parser.add_argument('--left_margin', type=int, default=36,
+                        help='Left margin.')
+    parser.add_argument('--upper_margin', type=int, default=48,
+                        help='Upper margin.')
+    parser.add_argument('--crop_width', type=int, default=196,
+                        help='Crop width.')
+    parser.add_argument('--crop_height', type=int, default=196,
+                        help='Crop height.')
+    parser.add_argument('--divisor', type=int, default=5,
+                        help='Size of vertical and horizontal separator(gap) applied when cutting each sample.')
+    parser.add_argument('--num_tiles_x', type=int, default=12,
+                        help='Amount of tiles in x direction on scanned page.')
+    parser.add_argument('--num_tiles_y', type=int, default=17,
+                        help='Amount of tiles in y direction on scanned page.')
+    parser.add_argument('--num_files', type=int, default=124,
+                        help='Amount of samples to be extracted from single scan file.')
 
-    cut_image_catalog(source_image_arrays_path_mp2, destination_images_path_mp, crop_width=196, crop_height=196,
-                      left_margin=36, upper_margin=48, divisor=5, num_tiles_x=12, num_tiles_y=17)
+    args = parser.parse_args()
+    source = args.source
+    destination = args.destination
+    left_margin = args.left_margin
+    upper_margin = args.upper_margin
+    crop_width = args.crop_width
+    crop_height = args.crop_height
+    divisor = args.divisor
+    num_tiles_x = args.num_tiles_x
+    num_tiles_y = args.num_tiles_y
+    num_files = args.num_files
 
-    cut_image_catalog(source_image_arrays_path_sp, destination_images_path_sp, crop_width=196, crop_height=196,
-                      left_margin=36, upper_margin=48, divisor=5, num_tiles_x=12, num_tiles_y=17)
+    cut_image_catalog(source, destination, crop_width, crop_height,
+                      left_margin, upper_margin, divisor, num_tiles_x, num_tiles_y, num_files)
 
 
 if __name__ == '__main__':
