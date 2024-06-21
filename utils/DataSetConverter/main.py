@@ -108,7 +108,7 @@ def array_to_images_sorted(imageFileName, location, labelFileName, flip_colors):
 
         label = chr(labelArray[image] + 97)
 
-        im.save(location + "/%s" % label + "/train_%s.bmp" % image, "bmp")
+        im.save(location + "/%s" % label + "/" + imageFileName.split(os.path.sep)[-1] + "_%s.bmp" % image, "bmp")
 
     imageFile.close()
 
