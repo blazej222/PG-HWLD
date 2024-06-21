@@ -46,7 +46,7 @@ def array_to_images(imageFileName, location, flip_colors):
         im = Image.fromarray(im)
         im = im.rotate(270)
         im = im.transpose(Image.FLIP_LEFT_RIGHT)
-        im.save(location + "/train_%s.bmp" % image, "bmp")
+        im.save(location + "/%s" % label + "/" + imageFileName.split(os.path.sep)[-1] + "_%s.png" % image, "png")
 
     imageFile.close()
 
@@ -108,7 +108,7 @@ def array_to_images_sorted(imageFileName, location, labelFileName, flip_colors):
 
         label = chr(labelArray[image] + 97)
 
-        im.save(location + "/%s" % label + "/" + imageFileName.split(os.path.sep)[-1] + "_%s.bmp" % image, "bmp")
+        im.save(location + "/%s" % label + "/" + imageFileName.split(os.path.sep)[-1] + "_%s.png" % image, "png")
 
     imageFile.close()
 
