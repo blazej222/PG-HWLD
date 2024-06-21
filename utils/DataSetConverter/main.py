@@ -46,7 +46,7 @@ def array_to_images(imageFileName, location, flip_colors):
         im = Image.fromarray(im)
         im = im.rotate(270)
         im = im.transpose(Image.FLIP_LEFT_RIGHT)
-        im.save(location + "/%s" % label + "/" + imageFileName.split(os.path.sep)[-1] + "_%s.png" % image, "png")
+        im.save(location + "/" + imageFileName.split(os.path.sep)[-1] + "_%s.png" % image, "png")
 
     imageFile.close()
 
