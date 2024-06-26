@@ -153,7 +153,7 @@ Also creates `.txt` file / numpy array with labels for each letter.
 
 The following arguments are accepted by this utility:
 
-- `--source_dataset` - Source directory of dataset in `extracted_undivided` format (required).
+- `--source_dataset` - Source directory of dataset in `idx3-ubyte` format (required).
 - `--source_labels` -  Labels file in `idx1-ubyte` format (required)
 - `--destination` - Destination directory where resulting processed dataset in `extracted_undivided` format will be placed (required).
 
