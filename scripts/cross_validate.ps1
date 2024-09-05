@@ -4,6 +4,8 @@ $datasetRoot = "../resources/datasets/dataset-processed/test-images"
 $outputRoot = "../resources/datasets/temp/subsets"
 $trainDir = "../resources/datasets/temp/train-images"
 $testDir = "../resources/datasets/temp/test-images"
+$datasetMatPath = "../resources/datasets/temp/mat"
+$tempDir = "../resources/datasets/temp"
 
 function Shuffle-Array {
     param([Object[]]$array)
@@ -12,10 +14,29 @@ function Shuffle-Array {
 
 function Dummy-Function {
     param([string]$trainPath, [string]$testPath, [int]$fold)
-    Write-Output "Processing fold $fold"
 
-    
+    ../resources/python/venv/Scripts/activate.ps1
 
+    $ErrorActionPreference="SilentlyContinue"
+    Stop-Transcript | out-null
+    $ErrorActionPreference = "Continue"
+
+    #Write-Output "Processing vgg"
+    #python ../models/vgg/main.py --train_path "$trainDir" --test_path "$testDir" --model1_filename "vgg $fold model1.pth" --model2_filename "spinalnet $fold model2.pth" | Out-File -FilePath "vgg $fold.txt"
+
+    #Write-Output "Processing WaveMix"
+    #python ../models/WaveMix/main.py --train_path "$trainDir" --test_path "$testDir" --model_filename "WaveMix $fold model.pth" | Out-File -FilePath "WaveMix $fold.txt"
+
+    Write-Output "Packing dataset"
+    python ../utils/DataSetPacker/main.py --source "$tempDir" --destination "$datasetMatPath/" --filename "packed_$fold.mat"
+
+    deactivate
+
+    ../resources/python/venv-3.6.8/Scripts/activate.ps1
+    Write-Output "Processing TextCaps"
+    python ..\\models\\TextCaps\\textcaps_emnist_bal.py --save_dir .\\saved_models\\TextCaps\\$fold --train_path .\\$datasetMatPath\\packed_$fold.mat --test_path .\\$datasetMatPath\\packed_$fold.mat | Out-File -FilePath "TextCaps $fold.txt"
+
+    deactivate
 }
 
 if(-not (Test-Path -Path $outputRoot)) {
@@ -49,7 +70,6 @@ Get-ChildItem -Path $datasetRoot -Directory | ForEach-Object {
 
 Write-Output "Finished subset creation"
 
-
 for ($testIndex = 0; $testIndex -lt 10; $testIndex++) {
     Write-Output "Processing fold $($testIndex + 1)"
 
@@ -67,13 +87,17 @@ for ($testIndex = 0; $testIndex -lt 10; $testIndex++) {
         $sourceDir = $subsets[$i]
 
         if ($i -eq $testIndex) {
-            Copy-Item -Recurse -Path $sourceDir -Destination $testDir
+            Get-ChildItem -Path $sourceDir | ForEach-Object {
+                Copy-Item -Force -Recurse -Path $_.FullName -Destination $testDir
+            }     
         } else {
-            Copy-Item -Recurse -Path $sourceDir -Destination $trainDir
+            Get-ChildItem -Path $sourceDir | ForEach-Object {
+                Copy-Item -Force -Recurse -Path $_.FullName -Destination $trainDir
+            }
         }
     }
 
-    Dummy-Function -trainPath $trainDir -testPath $testDir
+    Dummy-Function -trainPath $trainDir -testPath $testDir -fold $testIndex
 }
 
-Read-Host -Prompt "Press any key to continue"
+Read-Host -Prompt "Processed finished, press any key to clean up directories"

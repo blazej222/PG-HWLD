@@ -66,6 +66,10 @@ class CustomDataset(VisionDataset):
     def __len__(self):
         return len(self.file_list)
 
+# use GPU
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device_no = torch.cuda.current_device()
+print(torch.cuda.get_device_name(device_no))
 
 parser = argparse.ArgumentParser(description='VGG')
 parser.add_argument('--train_path', default=None,
@@ -387,7 +391,6 @@ class SpinalVGG(nn.Module):
         return F.log_softmax(x, dim=1)
 
 
-device = 'cuda'
 
 
 # For updating learning rate

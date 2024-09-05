@@ -100,8 +100,8 @@ def train(model, data, args):
     """
     (x_train, y_train), (x_test, y_test) = data
 
-    log = callbacks.CSVLogger(args.save_dir + '/log.csv')
-    checkpoint = callbacks.ModelCheckpoint(args.save_dir + '/weights-{epoch:02d}.h5', monitor='val_capsnet_acc',
+    log = callbacks.CSVLogger(args.save_dir + r'\log.csv')
+    checkpoint = callbacks.ModelCheckpoint(args.save_dir + '\\weights-{epoch:02d}.h5', monitor='val_capsnet_acc',
                                            save_best_only=False, save_weights_only=True, verbose=1)
     lr_decay = callbacks.LearningRateScheduler(schedule=lambda epoch: args.lr * (args.lr_decay ** epoch))
 
@@ -123,9 +123,9 @@ def train(model, data, args):
                         epochs=args.epochs,
                         shuffle = True,
                         validation_data=[[x_test, y_test], [y_test, x_test]],
-                        callbacks=snapshot.get_callbacks(log,model_prefix=model_prefix))
+                        callbacks=snapshot.get_callbacks(log, model_prefix=model_prefix))
 
-    model.save_weights(args.save_dir + '/trained_model.h5')
+    model.save_weights(args.save_dir + '\\trained_model.h5')
     print('Trained model saved to \'%s/trained_model.h5\'' % args.save_dir)
 
     return model
@@ -484,7 +484,7 @@ if __name__ == "__main__":
     nb_epoch = T = args.epochs
     alpha_zero = 0.01
     model_prefix = 'Model_'
-    snapshot = SnapshotCallbackBuilder(T, M, alpha_zero,args.save_dir)
+    snapshot = SnapshotCallbackBuilder(T, M, alpha_zero, args.save_dir)
     
     if args.weights is not None:
         model.load_weights(args.weights)
