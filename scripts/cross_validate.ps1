@@ -21,11 +21,11 @@ function Dummy-Function {
     Stop-Transcript | out-null
     $ErrorActionPreference = "Continue"
 
-    #Write-Output "Processing vgg"
-    #python ../models/vgg/main.py --train_path "$trainDir" --test_path "$testDir" --model1_filename "vgg $fold model1.pth" --model2_filename "spinalnet $fold model2.pth" | Out-File -FilePath "vgg $fold.txt"
+    Write-Output "Processing vgg"
+    python ../models/vgg/main.py --train_path "$trainDir" --test_path "$testDir" --model1_filename "vgg $fold model1.pth" --model2_filename "spinalnet $fold model2.pth" | Out-File -FilePath "vgg $fold.txt"
 
-    #Write-Output "Processing WaveMix"
-    #python ../models/WaveMix/main.py --train_path "$trainDir" --test_path "$testDir" --model_filename "WaveMix $fold model.pth" | Out-File -FilePath "WaveMix $fold.txt"
+    Write-Output "Processing WaveMix"
+    python ../models/WaveMix/main.py --train_path "$trainDir" --test_path "$testDir" --model_filename "WaveMix $fold model.pth" | Out-File -FilePath "WaveMix $fold.txt"
 
     Write-Output "Packing dataset"
     python ../utils/DataSetPacker/main.py --source "$tempDir" --destination "$datasetMatPath/" --filename "packed_$fold.mat"
