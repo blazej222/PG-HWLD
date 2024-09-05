@@ -34,7 +34,9 @@ function Dummy-Function {
 
     ../resources/python/venv-3.6.8/Scripts/activate.ps1
     Write-Output "Processing TextCaps"
-    python ..\\models\\TextCaps\\textcaps_emnist_bal.py --save_dir .\\saved_models\\TextCaps\\$fold --train_path .\\$datasetMatPath\\packed_$fold.mat --test_path .\\$datasetMatPath\\packed_$fold.mat | Out-File -FilePath "TextCaps $fold.txt"
+
+    $env:PYTHONIOENCODING="utf-8"
+    python ../models/TextCaps/textcaps_emnist_bal.py --save_dir "saved_models/TextCaps/$fold" --train_path "$datasetMatPath/packed_$fold.mat" --test_path "$datasetMatPath/packed_$fold.mat"
 
     deactivate
 }
