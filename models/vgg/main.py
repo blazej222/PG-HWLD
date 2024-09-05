@@ -488,7 +488,7 @@ best_accuracy1 = 0
 best_accuracy2 = 0
 
 if not os.path.exists(saved_model_path):
-    os.mkdir(saved_model_path)
+    os.makedirs(saved_model_path)
 
 # Testing logic goes here
 if test_only:

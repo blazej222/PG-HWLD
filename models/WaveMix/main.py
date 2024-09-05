@@ -51,6 +51,8 @@ if custom_loader_train_path is None:
 if custom_loader_test_path is None:
     use_custom_test_loader = False
 
+if not os.path.exists(args.saved_model_path):
+    os.makedirs(args.saved_model_path)
 
 class WaveMix(nn.Module):
     def __init__(
