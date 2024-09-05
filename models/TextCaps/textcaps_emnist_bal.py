@@ -153,7 +153,7 @@ def test(model, data, args):
     plt.ylabel('True')
     plt.title('Confusion Matrix - TextCaps')
     plt.savefig('Confusion Matrix - TextCaps.png')
-    plt.show()
+    #plt.show()
     
 class dataGeneration():
     def __init__(self, model,data,args,samples_to_generate = 2):
