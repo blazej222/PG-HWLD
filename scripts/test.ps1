@@ -1,5 +1,5 @@
 $OurDatasetExtractedPath = "../../resources/datasets/dataset-processed/test-images"
-$OurDatasetMatPath = "../../resources/datasets/packed/dataset-processed-old/dataset-processed.mat"
+$OurDatasetMatPath = "../../resources/datasets/packed/dataset-processed/dataset-processed.mat"
 $EMNISTMatPath = "../../resources/datasets/dataset-EMNIST-mat/emnist-letters.mat"
 Write-Output "Started Testing"
 ../resources/python/venv/Scripts/activate.ps1

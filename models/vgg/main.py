@@ -87,7 +87,7 @@ parser.add_argument('--model2_filename', default='model2.pth',
 parser.add_argument('--verbose', action='store_true', default=False,
                     help="Show additional debug information")
 parser.add_argument('--do_not_rotate_images', action='store_true', default=False,
-                    help="Do not perform automatic rotation of images when no train dataset is specified")
+                    help="Do not perform automatic rotation of images when no train dataset is specified.")
 parser.add_argument('--cmsuffix', default='',
                     help="Additional suffix added to image filenames of confusion matrix.")
 args = parser.parse_args()
