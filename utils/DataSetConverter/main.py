@@ -5,13 +5,14 @@ import os
 import argparse
 
 
-def array_to_images(imageFileName, location):
+def array_to_images(imageFileName, location, flip_colors):
     """
     Converts an array of images to actual image files.
 
     Args:
     - imageFileName (str): The file name of the array of images.
     - location (str): The directory where the images will be saved.
+    - flip_colors (bool): The flag to flip image colors.
 
     Returns:
     - numImages (int): Number of images processed.
@@ -36,22 +37,23 @@ def array_to_images(imageFileName, location):
         im = np.array(im, dtype='uint8')
 
         # flip colors
-        for pixel_no in range(im.size):
-            im[pixel_no] = 255 - im[pixel_no]
+        if flip_colors:
+            for pixel_no in range(im.size):
+                im[pixel_no] = 255 - im[pixel_no]
 
         im = im.reshape(28, 28)
 
         im = Image.fromarray(im)
         im = im.rotate(270)
         im = im.transpose(Image.FLIP_LEFT_RIGHT)
-        im.save(location + "/train_%s.bmp" % image, "bmp")
+        im.save(location + "/" + imageFileName.split(os.path.sep)[-1] + "_%s.png" % image, "png")
 
     imageFile.close()
 
     return numImages
 
 
-def array_to_images_sorted(imageFileName, location, labelFileName):
+def array_to_images_sorted(imageFileName, location, labelFileName, flip_colors):
     """
     Converts an array of images to actual image files sorted into labeled folders.
 
@@ -59,6 +61,7 @@ def array_to_images_sorted(imageFileName, location, labelFileName):
     - imageFileName (str): The file name of the array of images.
     - location (str): The directory where the images will be saved.
     - labelFileName (str): The file name containing labels for the images.
+    - flip_colors (bool): The flag to flip image colors.
 
     Returns:
     - numImages (int): Number of images processed.
@@ -93,8 +96,9 @@ def array_to_images_sorted(imageFileName, location, labelFileName):
         im = np.array(im, dtype='uint8')
 
         # flip colors
-        for pixel_no in range(im.size):
-            im[pixel_no] = 255 - im[pixel_no]
+        if flip_colors:
+            for pixel_no in range(im.size):
+                im[pixel_no] = 255 - im[pixel_no]
 
         im = im.reshape(28, 28)
 
@@ -104,7 +108,7 @@ def array_to_images_sorted(imageFileName, location, labelFileName):
 
         label = chr(labelArray[image] + 97)
 
-        im.save(location + "/%s" % label + "/train_%s.bmp" % image, "bmp")
+        im.save(location + "/%s" % label + "/" + imageFileName.split(os.path.sep)[-1] + "_%s.png" % image, "png")
 
     imageFile.close()
 
@@ -163,12 +167,16 @@ def main():
                         help='Labels file in idx1-ubyte format.')
     parser.add_argument('--destination', type=str, required=True,
                         help='Dataset destination directory.')
+    parser.add_argument('--flip_colors', action='store_true',
+                        help='Flip colors (on EMINST results in black-on-white).')
     args = parser.parse_args()
 
     filename = args.source_dataset
     labelFile = args.source_labels
     location = args.destination
-    array_to_images_sorted(filename, location, labelFile)
+    flip_colors = args.flip_colors
+
+    array_to_images_sorted(filename, location, labelFile, flip_colors)
 
 
 if __name__ == '__main__':

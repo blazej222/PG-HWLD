@@ -146,7 +146,7 @@ def main():
                         help='Processed dataset destination directory.')
     parser.add_argument('--threshold', type=int, default=100,
                         help='Threshold value.')
-    parser.add_argument('--verbose', type=bool, default=False,
+    parser.add_argument('--verbose', action='store_true',
                         help='Print debug info.')
     args = parser.parse_args()
 

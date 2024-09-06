@@ -21,6 +21,8 @@ import seaborn as sns
 
 # use GPU
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device_no = torch.cuda.current_device()
+print(torch.cuda.get_device_name(device_no))
 
 parser = argparse.ArgumentParser(description='WaveMix')
 parser.add_argument('--train_path', default=None,
@@ -37,6 +39,8 @@ parser.add_argument('--cmsuffix', default='',
                     help="Additional suffix added to image filenames of confusion matrix.")
 parser.add_argument('--verbose', action='store_true', default=False,
                     help="Whether additional debug information should be printed.")
+parser.add_argument('--do_not_rotate_images', action='store_true', default=False,
+                    help="Do not perform automatic rotation of images when no train dataset is specified")
 args = parser.parse_args()
 
 num_classes = 27
@@ -49,12 +53,15 @@ custom_loader_train_path = args.train_path
 test_only = args.test
 cmsuffix = args.cmsuffix
 debug_print = args.verbose
+do_not_rotate_images = args.do_not_rotate_images
 
 if custom_loader_train_path is None:
     use_custom_train_loader = False
 if custom_loader_test_path is None:
     use_custom_test_loader = False
 
+if not os.path.exists(args.saved_model_path):
+    os.makedirs(args.saved_model_path)
 
 class WaveMix(nn.Module):
     def __init__(
@@ -231,7 +238,7 @@ else:
 
 if use_custom_test_loader:
 
-    if use_custom_train_loader:
+    if use_custom_train_loader or do_not_rotate_images:
 
         test_dataset = CustomDataset(custom_loader_test_path,
                                      transform=torchvision.transforms.Compose([

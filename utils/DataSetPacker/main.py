@@ -21,7 +21,7 @@ parser.add_argument('--source', type=str, required=True,
                     help='Dataset source directory')
 parser.add_argument('--destination', type=str, required=True,
                     help='.Mat file destination directory')
-parser.add_argument('--reverse_colors', action='store_true', default=False,
+parser.add_argument('--reverse_colors', action='store_true',
                     help='Change black to white and vice versa')
 parser.add_argument('--filename', type=str, default='packed_dataset.mat',
                     help='Output filename')

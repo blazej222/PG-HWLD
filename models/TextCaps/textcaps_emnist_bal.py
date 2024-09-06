@@ -126,7 +126,7 @@ def train(model, data, args):
                         epochs=args.epochs,
                         shuffle = True,
                         validation_data=[[x_test, y_test], [y_test, x_test]],
-                        callbacks=snapshot.get_callbacks(log,model_prefix=model_prefix))
+                        callbacks=snapshot.get_callbacks(log, model_prefix=model_prefix))
 
     model.save_weights(args.save_dir + '/trained_model.h5')
     print('Trained model saved to \'%s/trained_model.h5\'' % args.save_dir)
@@ -491,7 +491,7 @@ if __name__ == "__main__":
     nb_epoch = T = args.epochs
     alpha_zero = 0.01
     model_prefix = 'Model_'
-    snapshot = SnapshotCallbackBuilder(T, M, alpha_zero,args.save_dir)
+    snapshot = SnapshotCallbackBuilder(T, M, alpha_zero, args.save_dir)
     
     if args.weights is not None:
         model.load_weights(args.weights)
@@ -506,7 +506,7 @@ if __name__ == "__main__":
             test(model=eval_model, data=(x_test, y_test), args=args)
         else:
             print("Training path was not specified. You need to specify training path.")
-        
+
     else:
         if args.weights is None:
             print('No weights are provided. You need to train a model first.')

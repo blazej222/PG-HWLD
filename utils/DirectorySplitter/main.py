@@ -3,6 +3,7 @@ import random
 import shutil
 import argparse
 
+
 def split_directory(data_dir, train_dir, val_dir, split_ratio):
     os.makedirs(train_dir, exist_ok=True)
     os.makedirs(val_dir, exist_ok=True)
@@ -39,7 +40,8 @@ def split_directory(data_dir, train_dir, val_dir, split_ratio):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Split dataset into training and validation subsets respecting split ratio.')
+    parser = argparse.ArgumentParser(
+        description='Split dataset into training and validation subsets respecting split ratio.')
     parser.add_argument('--source', type=str, required=True,
                         help='Dataset source directory.')
     parser.add_argument('--destination', type=str, required=True,
