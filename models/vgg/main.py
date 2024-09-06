@@ -86,9 +86,8 @@ parser.add_argument('--model2_filename', default='model2.pth',
                     help="Weights filename of VGG-Spinal")
 parser.add_argument('--verbose', action='store_true', default=False,
                     help="Show additional debug information")
-parser.add_argument('--rotate_images', action='store_true', default=False,
-                    help="Rotate images from test dataset by 90 degrees left, then flip them vertically to match those "
-                         "from default emnist training set.")
+parser.add_argument('--do_not_rotate_images', action='store_true', default=False,
+                    help="Do not perform automatic rotation of images when no train dataset is specified")
 parser.add_argument('--cmsuffix', default='',
                     help="Additional suffix added to image filenames of confusion matrix.")
 args = parser.parse_args()
@@ -112,7 +111,7 @@ saved_model_path = args.saved_model_path
 model1_filename = args.model1_filename
 model2_filename = args.model2_filename
 test_only = args.test
-rotate_images = args.rotate_images
+do_not_rotate_images = args.do_not_rotate_images
 cmsuffix = args.cmsuffix
 
 if custom_loader_train_path is None:
@@ -152,7 +151,7 @@ else:
 
 if use_custom_test_loader:
 
-    if use_custom_train_loader:
+    if use_custom_train_loader or do_not_rotate_images:
 
         test_dataset = CustomDataset(custom_loader_test_path,
                                      transform=torchvision.transforms.Compose([
