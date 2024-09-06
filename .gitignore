@@ -1,5 +1,10 @@
 __pycache__/
 .idea
 scripts/*.log
+scripts/logs
+!.gitkeep
+scripts/saved_models
+models/WaveMix/saved_models
+Confusion Matrix*.png
 tmp
 #TODO: Remove indexed copies of bigfiles from this repo to make it a lot lighter
