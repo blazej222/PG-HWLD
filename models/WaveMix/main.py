@@ -174,6 +174,11 @@ def testOnly(model):
 
     # Generate and display confusion matrix
     cm = confusion_matrix(all_labels, all_preds)
+    # Quick patch for when the confusion matrix is shifted by 1 horizontally and vertically
+    # This happens because the downloaded EMNIST dataset has an additional "N/A" class
+    # But since the model does not qualify any image as "N/A" a weird shift occurs in resulting confusion matrix
+    if test_dataset.classes[0] == 'N/A':
+        test_dataset.classes.pop(0)
     plt.figure(figsize=(10, 8))
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False, xticklabels=test_dataset.classes,
                 yticklabels=test_dataset.classes)

@@ -15,7 +15,7 @@
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/models/WaveMix/main.py" />
-    <option name="PARAMETERS" value="--test --test_path ../../resources/datasets/dataset-processed/test-images --model_filename model1.pth" />
+    <option name="PARAMETERS" value="--test --saved_model_path ./saved_models --model_filename model1.pth --cmsuffix emnist_1" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />
