@@ -35,6 +35,10 @@ parser.add_argument('--saved_model_path', default='./saved_models',
                     help="Path to directory containing saved model weights. Weights from training will be saved there")
 parser.add_argument('--model_filename', default='model.pth',
                     help="Weights filename")
+parser.add_argument('--cmsuffix', default='',
+                    help="Additional suffix added to image filenames of confusion matrix.")
+parser.add_argument('--verbose', action='store_true', default=False,
+                    help="Whether additional debug information should be printed.")
 args = parser.parse_args()
 
 num_classes = 27
@@ -45,6 +49,8 @@ use_custom_test_loader = True
 custom_loader_test_path = args.test_path
 custom_loader_train_path = args.train_path
 test_only = args.test
+cmsuffix = args.cmsuffix
+debug_print = args.verbose
 
 if custom_loader_train_path is None:
     use_custom_train_loader = False
@@ -178,14 +184,15 @@ def testOnly(model):
     plt.xlabel('Predicted')
     plt.ylabel('True')
     plt.title('Confusion Matrix - WaveMix')
-    plt.savefig('Confusion Matrix - WaveMix.png')
-    plt.show()
+    plt.savefig(f'Confusion Matrix - WaveMix - {cmsuffix}.png')
+    # plt.show()
 
 
 model.to(device)
 # summary
-print(summary(model, (1, 28, 28)))
-print(torch.cuda.get_device_properties(device))
+if debug_print:
+    print(summary(model, (1, 28, 28)))
+    print(torch.cuda.get_device_properties(device))
 
 # set batch size according to GPU
 batch_size = 256
@@ -199,9 +206,9 @@ if use_custom_train_loader:
                                       torchvision.transforms.ToTensor(),
                                       torchvision.transforms.Normalize((0.1307,), (0.3081,))
                                   ]), train=True)
-
-    print(f"Number of train classes: {len(train_dataset.classes)}")
-    print(train_dataset.classes)
+    if debug_print:
+        print(f"Number of train classes: {len(train_dataset.classes)}")
+        print(train_dataset.classes)
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
@@ -217,8 +224,9 @@ else:
                                     ])),
         batch_size=batch_size, shuffle=True)
     train_dataset = train_loader.dataset
-    print(f"Number of train classes: {len(train_dataset.classes)}")
-    print(train_dataset.classes)
+    if debug_print:
+        print(f"Number of train classes: {len(train_dataset.classes)}")
+        print(train_dataset.classes)
 
 if use_custom_test_loader:
 
@@ -237,9 +245,9 @@ if use_custom_test_loader:
                                          torchvision.transforms.ToTensor(),
                                          torchvision.transforms.Normalize((0.1307,), (0.3081,))
                                      ]), train=False)
-
-    print(f"Number of test classes: {len(test_dataset.classes)}")
-    print(test_dataset.classes)
+    if debug_print:
+        print(f"Number of test classes: {len(test_dataset.classes)}")
+        print(test_dataset.classes)
 
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
 
@@ -253,8 +261,9 @@ else:
                                     ])),
         batch_size=batch_size, shuffle=True)
     test_dataset = test_loader.dataset
-    print(f"Number of test classes: {len(test_dataset.classes)}")
-    print(test_dataset.classes)
+    if debug_print:
+        print(f"Number of test classes: {len(test_dataset.classes)}")
+        print(test_dataset.classes)
 
 # Loading the dataset from our own files
 

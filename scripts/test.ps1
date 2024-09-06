@@ -50,21 +50,21 @@ python main.py --test --saved_model_path ./saved_models --model_filename model3.
 
 cd ../..
 deactivate
-#resources/python/venv-3.6.8/Scripts/activate.ps1
-#cd models/TextCaps
-#
-#Write-Output "`nTextcaps end result run1 ourset"
-#python textcaps_emnist_bal.py --test --weights ./saved_models/emnist_letters_5600_run1/trained_model.h5 --test_path $OurDatasetMatPath --cmsuffix ourset_1
-#Write-Output "`nTextcaps end result run2 ourset"
-#python textcaps_emnist_bal.py --test --weights ./saved_models/emnist_letters_5600_run2/trained_model.h5 --test_path $OurDatasetMatPath --cmsuffix ourset_2
-#Write-Output "`nTextcaps end result run3 ourset"
-#python textcaps_emnist_bal.py --test --weights ./saved_models/emnist_letters_5600_run3/trained_model.h5 --test_path $OurDatasetMatPath --cmsuffix ourset_3
-#
-#Write-Output "`nTextcaps end result run1 emnist"
-#python textcaps_emnist_bal.py --test --weights ./saved_models/emnist_letters_5600_run1/trained_model.h5 --test_path $EMNISTMatPath --cmsuffix emnist_1
-#Write-Output "`nTextcaps end result run2 emnist"
-#python textcaps_emnist_bal.py --test --weights ./saved_models/emnist_letters_5600_run2/trained_model.h5 --test_path $EMNISTMatPath --cmsuffix emnist_2
-#Write-Output "`nTextcaps end result run3 emnist"
-#python textcaps_emnist_bal.py --test --weights ./saved_models/emnist_letters_5600_run3/trained_model.h5 --test_path $EMNISTMatPath --cmsuffix emnist_3
-#deactivate
-#cd ../../scripts
+resources/python/venv-3.6.8/Scripts/activate.ps1
+cd models/TextCaps
+
+Write-Output "`nTextcaps end result run1 ourset"
+python textcaps_emnist_bal.py --test --weights ./saved_models/emnist_letters_5600_run1/trained_model.h5 --test_path $OurDatasetMatPath --cmsuffix ourset_1
+Write-Output "`nTextcaps end result run2 ourset"
+python textcaps_emnist_bal.py --test --weights ./saved_models/emnist_letters_5600_run2/trained_model.h5 --test_path $OurDatasetMatPath --cmsuffix ourset_2
+Write-Output "`nTextcaps end result run3 ourset"
+python textcaps_emnist_bal.py --test --weights ./saved_models/emnist_letters_5600_run3/trained_model.h5 --test_path $OurDatasetMatPath --cmsuffix ourset_3
+
+Write-Output "`nTextcaps end result run1 emnist"
+python textcaps_emnist_bal.py --test --weights ./saved_models/emnist_letters_5600_run1/trained_model.h5 --test_path $EMNISTMatPath --cmsuffix emnist_1
+Write-Output "`nTextcaps end result run2 emnist"
+python textcaps_emnist_bal.py --test --weights ./saved_models/emnist_letters_5600_run2/trained_model.h5 --test_path $EMNISTMatPath --cmsuffix emnist_2
+Write-Output "`nTextcaps end result run3 emnist"
+python textcaps_emnist_bal.py --test --weights ./saved_models/emnist_letters_5600_run3/trained_model.h5 --test_path $EMNISTMatPath --cmsuffix emnist_3
+deactivate
+cd ../../scripts

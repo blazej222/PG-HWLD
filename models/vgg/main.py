@@ -87,7 +87,10 @@ parser.add_argument('--model2_filename', default='model2.pth',
 parser.add_argument('--verbose', action='store_true', default=False,
                     help="Show additional debug information")
 parser.add_argument('--rotate_images', action='store_true', default=False,
-                    help="Rotate images from test dataset by 90 degrees left, then flip them vertically to match those from default emnist training set.")
+                    help="Rotate images from test dataset by 90 degrees left, then flip them vertically to match those "
+                         "from default emnist training set.")
+parser.add_argument('--cmsuffix', default='',
+                    help="Additional suffix added to image filenames of confusion matrix.")
 args = parser.parse_args()
 
 num_epochs = 200
@@ -110,6 +113,7 @@ model1_filename = args.model1_filename
 model2_filename = args.model2_filename
 test_only = args.test
 rotate_images = args.rotate_images
+cmsuffix = args.cmsuffix
 
 if custom_loader_train_path is None:
     use_custom_train_loader = False
@@ -207,15 +211,15 @@ batch_idx, (example_data, example_targets) = next(examples)
 
 print(example_data.shape)
 
-fig = plt.figure()
-for i in range(6):
-    plt.subplot(2, 3, i + 1)
-    plt.tight_layout()
-    plt.imshow(example_data[i][0], cmap='gray', interpolation='none')
-    plt.title("Ground Truth: {}".format(example_targets[i]))
-    plt.xticks([])
-    plt.yticks([])
-fig
+if debug_print:
+    fig = plt.figure()
+    for i in range(6):
+        plt.subplot(2, 3, i + 1)
+        plt.tight_layout()
+        plt.imshow(example_data[i][0], cmap='gray', interpolation='none')
+        plt.title("Ground Truth: {}".format(example_targets[i]))
+        plt.xticks([])
+        plt.yticks([])
 
 
 class VGG(nn.Module):
@@ -443,7 +447,7 @@ def test_model(model1, model2):
 
         print('Test Accuracy of SpinalNet: {} %'.format(100 * correct2 / total2))
 
-        # Generate and display confusion matrix
+        # Generate confusion matrix
         cm = confusion_matrix(all_labels_1, all_preds_1)
         plt.figure(figsize=(10, 8))
         sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False, xticklabels=test_dataset.classes,
@@ -451,10 +455,10 @@ def test_model(model1, model2):
         plt.xlabel('Predicted')
         plt.ylabel('True')
         plt.title('Confusion Matrix - VGG')
-        plt.savefig('Confusion Matrix - VGG.png')
-        plt.show()
+        plt.savefig(f'Confusion Matrix - VGG-{cmsuffix}.png')
+        #plt.show()
 
-        # Generate and display confusion matrix
+        # Generate confusion matrix
         cm = confusion_matrix(all_labels_2, all_preds_2)
         plt.figure(figsize=(10, 8))
         sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False, xticklabels=test_dataset.classes,
@@ -462,8 +466,8 @@ def test_model(model1, model2):
         plt.xlabel('Predicted')
         plt.ylabel('True')
         plt.title('Confusion Matrix - VGG SpinalNet')
-        plt.savefig('Confusion Matrix - VGG(SpinalNet).png')
-        plt.show()
+        plt.savefig(f'Confusion Matrix - VGG(SpinalNet)-{cmsuffix}.png')
+        #plt.show()
 
 
 # Train the model
