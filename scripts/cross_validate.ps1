@@ -12,7 +12,7 @@ function Shuffle-Array {
     $array | Sort-Object { Get-Random }
 }
 
-function Dummy-Function {
+function Perform-Training {
     param([string]$trainPath, [string]$testPath, [int]$fold)
 
     ../resources/python/venv/Scripts/activate.ps1
@@ -99,7 +99,7 @@ for ($testIndex = 0; $testIndex -lt 10; $testIndex++) {
         }
     }
 
-    Dummy-Function -trainPath $trainDir -testPath $testDir -fold $testIndex
+    Perform-Training -trainPath $trainDir -testPath $testDir -fold $testIndex
 }
 
-Read-Host -Prompt "Processed finished, press any key to clean up directories"
+Read-Host -Prompt "Process finished, press any key close"
