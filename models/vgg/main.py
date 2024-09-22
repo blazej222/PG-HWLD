@@ -459,7 +459,7 @@ def test_model(model1, model2):
         plt.xlabel('Predicted')
         plt.ylabel('True')
         plt.title('Confusion Matrix - VGG')
-        plt.savefig(f'Confusion Matrix - VGG-{cmsuffix}.png')
+        plt.savefig(f'confusion_matrix/Confusion Matrix - VGG-{cmsuffix}.png')
         #plt.show()
 
         # Generate confusion matrix
@@ -470,7 +470,7 @@ def test_model(model1, model2):
         plt.xlabel('Predicted')
         plt.ylabel('True')
         plt.title('Confusion Matrix - VGG SpinalNet')
-        plt.savefig(f'Confusion Matrix - VGG(SpinalNet)-{cmsuffix}.png')
+        plt.savefig(f'confusion_matrix/Confusion Matrix - VGG(SpinalNet)-{cmsuffix}.png')
         #plt.show()
 
 

@@ -155,7 +155,7 @@ def test(model, data, args):
     plt.xlabel('Predicted')
     plt.ylabel('True')
     plt.title('Confusion Matrix - TextCaps')
-    plt.savefig(f'Confusion Matrix - TextCaps-{cmsuffix}.png')
+    plt.savefig(f'confusion_matrix/Confusion Matrix - TextCaps-{cmsuffix}.png')
     # plt.show()
     
 class dataGeneration():
