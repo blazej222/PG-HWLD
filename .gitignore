@@ -7,4 +7,5 @@ scripts/saved_models
 models/WaveMix/saved_models
 Confusion Matrix*.png
 tmp
+backup_*
 #TODO: Remove indexed copies of bigfiles from this repo to make it a lot lighter
