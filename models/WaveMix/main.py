@@ -192,7 +192,7 @@ def testOnly(model):
     plt.xlabel('Predicted')
     plt.ylabel('True')
     plt.title('Confusion Matrix - WaveMix')
-    plt.savefig(f'Confusion Matrix - WaveMix - {cmsuffix}.png')
+    plt.savefig(f'confusion_matrix/Confusion Matrix - WaveMix - {cmsuffix}.png')
     # plt.show()
 
 

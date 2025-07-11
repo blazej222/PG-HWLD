@@ -4,7 +4,6 @@
 
 This repository contains models and utilities used to achieve results described in paper.
 "The state of machine learning models in handwritten character recognition". 
-Link to the article is presented [here](example.org).
 
 ## Description of directory structure
 
@@ -71,6 +70,19 @@ If some of the packages fail to install or throw errors, try copying them from t
 environments bundled with this repository.
 
 ## Using models
+
+### Scripts
+Powershell scripts for training, testing and cross-validation have been provided inside this repository.
+
+`cross_validate.ps1` - split dataset into subsets for cross validation, then perform model training on subsets.
+
+`train.ps1` - trains all models thrice on Emnist-letters dataset.
+
+`test.ps1` - performs testing on all models.
+
+`test_cross_validate.ps1` - performs cross-validation testing on subsets created and models trained by `cross_validate.ps1`.
+
+`pack_dataset.ps1` - packs dataset `extracted` to `.mat` format by calling `DataSetPacker`.
 
 ### VGG-5
 When run with no arguments, the model will train itself on `EMNIST-letters` dataset, and then perform a test 
