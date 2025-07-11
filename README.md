@@ -26,24 +26,49 @@ Example - letter `a` sample used for training can be stored as `train-images/a/x
 
 ## Getting started
 
-Two separate virtual environments are required in order to run all the models and utilities. 
-They should be created under `resources/python/`.
+### CUDA Requirements
+- Nvidia CUDA toolkit 8.0.61
+- Nvidia CUDNN library 5.1
 
-Python `3.6.8` is required to run `TextCaps` model, and Python `3.11.7` is required to run 
+### Repository location (Windows)
+Due to an unaddressed issue in the required version of `keras`, some Windows path strings dependent on the disk location
+cause crashes of model scripts. We recommend placing this repository in the root directory of your volume. 
+
+### Usage of bundled virtual environments (recommended, Windows)
+Due to the growing difficulty in obtaining specific versions of dependency packages required to run the bundled models, 
+we have included pre-configured virtual environments for usage with Windows under `resources/python/`.
+
+Two separate virtual environments are required in order to run all the models and utilities.
+
+Python `3.6.8` (`venv-3.6.8`) is required to run `TextCaps` model, and Python `3.11.7` (`venv`) is required to run 
 all the other models/utilities.
 
-Every model and utility directory should contain a file called `requirements.txt`.
+We highly recommend using the bundled virtual environments for performing testing or validation, as some of the packages
+required for the models to operate are no longer easily obtainable from official repositories.
 
+In order to switch between the virtual environments, please invoke the corresponding `activate.ps1` Powershell script 
+from the `Scripts` directory of a given environment. The Powershell version does not use absolute paths, and as such no 
+machine-specific modification is required. Please see `/scripts/test.ps1` for usage examples.
+
+The bundled virtual environments have been tested and proved functional using:
+
+- Nvidia RTX 3000 and 4000 series graphics cards
+- Nvidia GeForce Game Ready Driver 576.88
+
+### Creating your own virtual environments (optional, Linux)
 Create appropriate virtual environments and activate the one you'll
 be using for now (`3.6.8` for TextCaps, `3.11.7` for everything else).
 
-Once inside model/utility directory, use:
+Every model and utility directory should contain a file called `requirements.txt`. Once inside model/utility directory, use:
 
 `pip install -r requirements.txt`
 
 to install all requirements.
 
-In order to use TextCaps `tensorflow-gpu 1.2.1` must be installed, with `cuda_8.0.61` and `cudnn-8.0`.
+In order to use TextCaps `tensorflow-gpu 1.2.1` must be installed, with `cuda_8.0.61` and `cudnn-5.1`.
+
+If some of the packages fail to install or throw errors, try copying them from the `Lib` directory from virtual 
+environments bundled with this repository.
 
 ## Using models
 
