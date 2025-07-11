@@ -6,11 +6,11 @@ Write-Output "Started Testing"
 cd ../models/vgg
 
 Write-Output "VGG end result run1 ourset"
-python main.py --test --test_path $OurDatasetExtractedPath --rotate_images --saved_model_path ./saved_models/run1 --cmsuffix end_ourset_1
+python main.py --test --test_path $OurDatasetExtractedPath --saved_model_path ./saved_models/run1 --cmsuffix end_ourset_1
 Write-Output "`nVGG end result run2 ourset"
-python main.py --test --test_path $OurDatasetExtractedPath --rotate_images --saved_model_path ./saved_models/run2 --cmsuffix end_ourset_2
+python main.py --test --test_path $OurDatasetExtractedPath --saved_model_path ./saved_models/run2 --cmsuffix end_ourset_2
 Write-Output "`nVGG end result run3 ourset"
-python main.py --test --test_path $OurDatasetExtractedPath --rotate_images --saved_model_path ./saved_models/run3 --cmsuffix end_ourset_3
+python main.py --test --test_path $OurDatasetExtractedPath --saved_model_path ./saved_models/run3 --cmsuffix end_ourset_3
 
 Write-Output "`nVGG end result run1 emnist"
 python main.py --test --saved_model_path ./saved_models/run1 --cmsuffix end_emnist_1
@@ -20,11 +20,11 @@ Write-Output "`nVGG end result run3 emnist"
 python main.py --test --saved_model_path ./saved_models/run3 --cmsuffix end_emnist_3
 
 Write-Output "`nVGG best result run1 ourset"
-python main.py --test --test_path $OurDatasetExtractedPath --rotate_images --saved_model_path ./saved_models/run1 --model1_filename best_model1.pth --model2_filename best_model2.pth --cmsuffix best_ourset_1
+python main.py --test --test_path $OurDatasetExtractedPath --saved_model_path ./saved_models/run1 --model1_filename best_model1.pth --model2_filename best_model2.pth --cmsuffix best_ourset_1
 Write-Output "`nVGG best result run2 ourset"
-python main.py --test --test_path $OurDatasetExtractedPath --rotate_images --saved_model_path ./saved_models/run2 --model1_filename best_model1.pth --model2_filename best_model2.pth --cmsuffix best_ourset_2
+python main.py --test --test_path $OurDatasetExtractedPath --saved_model_path ./saved_models/run2 --model1_filename best_model1.pth --model2_filename best_model2.pth --cmsuffix best_ourset_2
 Write-Output "`nVGG best result run3 ourset"
-python main.py --test --test_path $OurDatasetExtractedPath --rotate_images --saved_model_path ./saved_models/run3 --model1_filename best_model1.pth --model2_filename best_model2.pth --cmsuffix best_ourset_3
+python main.py --test --test_path $OurDatasetExtractedPath --saved_model_path ./saved_models/run3 --model1_filename best_model1.pth --model2_filename best_model2.pth --cmsuffix best_ourset_3
 
 Write-Output "`nVGG best result run1 emnist"
 python main.py --test --saved_model_path ./saved_models/run1 --model1_filename best_model1.pth --model2_filename best_model2.pth --cmsuffix best_emnist_1
@@ -35,18 +35,18 @@ python main.py --test --saved_model_path ./saved_models/run3 --model1_filename b
 
 cd ../WaveMix
 Write-Output "`nWaveMix best result run1 ourset"
-python main.py --test --test_path $OurDatasetExtractedPath --saved_model_path ./saved_models --model_filename model1.pth --cmsuffix ourset_1
+python main.py --test --test_path $OurDatasetExtractedPath --saved_model_path ./saved_models/run1 --model_filename model.pth --cmsuffix ourset_1
 Write-Output "`nWaveMix best result run2 ourset"
-python main.py --test --test_path $OurDatasetExtractedPath --saved_model_path ./saved_models --model_filename model2.pth --cmsuffix ourset_2
+python main.py --test --test_path $OurDatasetExtractedPath --saved_model_path ./saved_models/run2 --model_filename model.pth --cmsuffix ourset_2
 Write-Output "`nWaveMix best result run3 ourset"
-python main.py --test --test_path $OurDatasetExtractedPath --saved_model_path ./saved_models --model_filename model3.pth --cmsuffix ourset_3
+python main.py --test --test_path $OurDatasetExtractedPath --saved_model_path ./saved_models/run3 --model_filename model.pth --cmsuffix ourset_3
 
 Write-Output "`nWaveMix best result run1 emnist"
-python main.py --test --saved_model_path ./saved_models --model_filename model1.pth --cmsuffix emnist_1
+python main.py --test --saved_model_path ./saved_models/run1 --model_filename model.pth --cmsuffix emnist_1
 Write-Output "`nWaveMix best result run2 emnist"
-python main.py --test --saved_model_path ./saved_models --model_filename model2.pth --cmsuffix emnist_2
+python main.py --test --saved_model_path ./saved_models/run2 --model_filename model.pth --cmsuffix emnist_2
 Write-Output "`nWaveMix best result run3 emnist"
-python main.py --test --saved_model_path ./saved_models --model_filename model3.pth --cmsuffix emnist_3
+python main.py --test --saved_model_path ./saved_models/run3 --model_filename model.pth --cmsuffix emnist_3
 
 cd ../..
 deactivate
