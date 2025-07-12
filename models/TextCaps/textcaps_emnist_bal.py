@@ -144,6 +144,9 @@ def test(model, data, args):
     print('Test acc:', np.sum(np.argmax(y_pred, 1) == np.argmax(y_test, 1))/float(y_test.shape[0]))
 
     # Generate confusion matrix
+    if not os.path.exists('confusion_matrix'):
+        os.makedirs('confusion_matrix')
+
     y_test_labels = np.argmax(y_test, axis=1)
     y_pred_labels = np.argmax(y_pred, axis=1)
     cm = confusion_matrix(y_test_labels, y_pred_labels)

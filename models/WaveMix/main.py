@@ -180,6 +180,9 @@ def testOnly(model):
     print(f"Top 1: {correct_1 * 100 / c:.2f} - Top 5: {correct_5 * 100 / c:.2f}\n")
 
     # Generate and display confusion matrix
+    if not os.path.exists('confusion_matrix'):
+        os.makedirs('confusion_matrix')
+
     cm = confusion_matrix(all_labels, all_preds)
     # Quick patch for when the confusion matrix is shifted by 1 horizontally and vertically
     # This happens because the downloaded EMNIST dataset has an additional "N/A" class

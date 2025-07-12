@@ -447,6 +447,9 @@ def test_model(model1, model2):
         print('Test Accuracy of SpinalNet: {} %'.format(100 * correct2 / total2))
 
         # Generate confusion matrix
+        if not os.path.exists('confusion_matrix'):
+            os.makedirs('confusion_matrix')
+
         cm = confusion_matrix(all_labels_1, all_preds_1)
         # Quick patch for when the confusion matrix is shifted by 1 horizontally and vertically
         # This happens because the downloaded EMNIST dataset has an additional "N/A" class

@@ -2,6 +2,14 @@ $OurDatasetExtractedPath = "../../resources/datasets/dataset-processed/test-imag
 $OurDatasetMatPath = "../../resources/datasets/packed/dataset-processed/dataset-processed.mat"
 $EMNISTMatPath = "../../resources/datasets/dataset-EMNIST-mat/emnist-letters.mat"
 
+
+if (-Not (Test-Path -Path "logs")) {
+    New-Item -ItemType Directory -Path "logs"
+}
+if (-Not (Test-Path -Path "logs/test")) {
+    New-Item -ItemType Directory -Path "logs/test"
+}
+
 Write-Output "Started Testing"
 
 ../resources/python/venv/Scripts/activate.ps1
@@ -11,7 +19,6 @@ Write-Output "VGG end result run1 ourset"
 python main.py `
     --test `
     --test_path $OurDatasetExtractedPath `
-    --rotate_images `
     --saved_model_path ./saved_models/run1 `
     --cmsuffix end_ourset_1 `
     | Out-File -FilePath "../../scripts/logs/test/VGG end result run1 ourset"
@@ -20,7 +27,6 @@ Write-Output "`nVGG end result run2 ourset"
 python main.py `
     --test `
     --test_path $OurDatasetExtractedPath `
-    --rotate_images `
     --saved_model_path ./saved_models/run2 `
     --cmsuffix end_ourset_2 `
     | Out-File -FilePath "../../scripts/logs/test/VGG end result run2 ourset"
@@ -29,7 +35,6 @@ Write-Output "`nVGG end result run3 ourset"
 python main.py `
     --test `
     --test_path $OurDatasetExtractedPath `
-    --rotate_images `
     --saved_model_path ./saved_models/run3 `
     --cmsuffix end_ourset_3 `
     | Out-File -FilePath "../../scripts/logs/test/VGG end result run3 ourset"
@@ -59,7 +64,6 @@ Write-Output "`nVGG best result run1 ourset"
 python main.py `
     --test `
     --test_path $OurDatasetExtractedPath `
-    --rotate_images `
     --saved_model_path ./saved_models/run1 `
     --model1_filename best_model1.pth `
     --model2_filename best_model2.pth `
@@ -70,7 +74,6 @@ Write-Output "`nVGG best result run2 ourset"
 python main.py `
     --test `
     --test_path $OurDatasetExtractedPath `
-    --rotate_images `
     --saved_model_path ./saved_models/run2 `
     --model1_filename best_model1.pth `
     --model2_filename best_model2.pth `
@@ -81,7 +84,6 @@ Write-Output "`nVGG best result run3 ourset"
 python main.py `
     --test `
     --test_path $OurDatasetExtractedPath `
-    --rotate_images `
     --saved_model_path ./saved_models/run3 `
     --model1_filename best_model1.pth `
     --model2_filename best_model2.pth `
@@ -120,8 +122,8 @@ Write-Output "`nWaveMix best result run1 ourset"
 python main.py `
     --test `
     --test_path $OurDatasetExtractedPath `
-    --saved_model_path ./saved_models `
-    --model_filename model1.pth `
+    --saved_model_path ./saved_models/run1 `
+    --model_filename model.pth `
     --cmsuffix ourset_1 `
     | Out-File -FilePath "../../scripts/logs/test/WaveMix best result run1 ourset"
 
@@ -129,8 +131,8 @@ Write-Output "`nWaveMix best result run2 ourset"
 python main.py `
     --test `
     --test_path $OurDatasetExtractedPath `
-    --saved_model_path ./saved_models `
-    --model_filename model2.pth `
+    --saved_model_path ./saved_models/run2 `
+    --model_filename model.pth `
     --cmsuffix ourset_2 `
     | Out-File -FilePath "../../scripts/logs/test/WaveMix best result run2 ourset"
 
@@ -138,32 +140,32 @@ Write-Output "`nWaveMix best result run3 ourset"
 python main.py `
     --test `
     --test_path $OurDatasetExtractedPath `
-    --saved_model_path ./saved_models `
-    --model_filename model3.pth `
+    --saved_model_path ./saved_models/run3 `
+    --model_filename model.pth `
     --cmsuffix ourset_3 `
     | Out-File -FilePath "../../scripts/logs/test/WaveMix best result run3 ourset"
 
 Write-Output "`nWaveMix best result run1 emnist"
 python main.py `
     --test `
-    --saved_model_path ./saved_models `
-    --model_filename model1.pth `
+    --saved_model_path ./saved_models/run1 `
+    --model_filename model.pth `
     --cmsuffix emnist_1 `
     | Out-File -FilePath "../../scripts/logs/test/WaveMix best result run1 emnist"
 
 Write-Output "`nWaveMix best result run2 emnist"
 python main.py `
     --test `
-    --saved_model_path ./saved_models `
-    --model_filename model2.pth `
+    --saved_model_path ./saved_models/run2 `
+    --model_filename model.pth `
     --cmsuffix emnist_2 `
     | Out-File -FilePath "../../scripts/logs/test/WaveMix best result run2 emnist"
 
 Write-Output "`nWaveMix best result run3 emnist"
 python main.py `
     --test `
-    --saved_model_path ./saved_models `
-    --model_filename model3.pth `
+    --saved_model_path ./saved_models/run3 `
+    --model_filename model.pth `
     --cmsuffix emnist_3 `
     | Out-File -FilePath "../../scripts/logs/test/WaveMix best result run3 emnist"
 
@@ -219,5 +221,6 @@ python textcaps_emnist_bal.py `
     --test_path $EMNISTMatPath `
     --cmsuffix emnist_3 `
     | Out-File -FilePath "../../scripts/logs/test/Textcaps end result run3 emnist"
+
 deactivate
 cd ../../scripts
