@@ -45,9 +45,12 @@ all the other models/utilities.
 We highly recommend using the bundled virtual environments for performing testing or validation, as some of the packages
 required for the models to operate are no longer easily obtainable from official repositories.
 
+Before running any python code using said environments, please run the `install.ps1` script located in the main directory
+to set up the necessary absolute paths for your system.
+
 In order to switch between the virtual environments, please invoke the corresponding `activate.ps1` Powershell script 
 from the `Scripts` directory of a given environment. The Powershell version does not use absolute paths, and as such no 
-machine-specific modification is required. Please see `/scripts/test.ps1` for usage examples.
+further machine-specific modification is required. Please see `scripts/test.ps1` for usage examples.
 
 The bundled virtual environments have been tested and proved functional using:
 
@@ -66,8 +69,8 @@ to install all requirements.
 
 In order to use TextCaps `tensorflow-gpu 1.2.1` must be installed, with `cuda_8.0.61` and `cudnn-5.1`.
 
-If some of the packages fail to install or throw errors, try copying them from the `Lib` directory from virtual 
-environments bundled with this repository.
+If some of the packages fail to install or throw errors, try copying them from the `Lib` directories of virtual 
+environments bundled with this repository under `resources/python/`.
 
 ## Using models
 
