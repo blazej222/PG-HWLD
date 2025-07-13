@@ -72,7 +72,7 @@ def merge_subdir_means(dataframes):
 
 
 # Function to plot the subdirectory means
-def plot_subdir_means(merged_df, value_name, dataset_names):
+def plot_subdir_means(merged_df, value_name, dataset_names, output_path):
     subdirs = merged_df.index
     x = range(len(subdirs))
     bar_width = 0.2
@@ -93,11 +93,12 @@ def plot_subdir_means(merged_df, value_name, dataset_names):
     ax.legend()
 
     plt.tight_layout()
-    plt.show()
+    plt.savefig(f'{output_path}/{value_name}.png')
+    #plt.show()
 
 
 # Function to plot the total means
-def plot_total_means(total_means_list, dataset_names):
+def plot_total_means(total_means_list, dataset_names, output_path):
     metrics = ['non_zero_pixels', 'mean_weight']
     total_means_df = pd.DataFrame(total_means_list)
 
@@ -119,13 +120,14 @@ def plot_total_means(total_means_list, dataset_names):
     ax.legend()
 
     plt.tight_layout()
-    plt.show()
+    plt.savefig(f'{output_path}/total_means.png')
+    #plt.show()
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Apply the EMNIST image processing steps to each sample.')
+    parser = argparse.ArgumentParser(description='Compare given datasets in terms of relevant statistics.')
     parser.add_argument('--sources', nargs='+', required=True,
-                        help='Source directories of datasets.')
+                        help='Source directories of compared datasets.')
     parser.add_argument('--output', type=str, required=True,
                         help='CSV statistics files output directory.')
     parser.add_argument('--verbose', action='store_true',
@@ -156,11 +158,11 @@ if __name__ == "__main__":
     merged_subdir_means_df = merge_subdir_means(subdir_means_dataframes)
 
     # Plot subdirectory means
-    plot_subdir_means(merged_subdir_means_df, 'non_zero_pixels', dataset_names)
-    plot_subdir_means(merged_subdir_means_df, 'mean_weight', dataset_names)
+    plot_subdir_means(merged_subdir_means_df, 'non_zero_pixels', dataset_names, output_csv_path)
+    plot_subdir_means(merged_subdir_means_df, 'mean_weight', dataset_names, output_csv_path)
 
     # Plot total means
-    plot_total_means(total_means_series, dataset_names)
+    plot_total_means(total_means_series, dataset_names, output_csv_path)
 
     end = time()
     print(f"Finished in {end - start}")

@@ -50,7 +50,7 @@ def EMNISTify(image, threshold, verbose=False):
     left_border = 0
     right_border = 0
 
-    # Fit into a square if not ROI was not even-sided
+    # Fit into a square if ROI was not even-sided
     if w > h:
         to_add = w - h
         top_border = to_add // 2
