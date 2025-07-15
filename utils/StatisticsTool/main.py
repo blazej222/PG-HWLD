@@ -1,9 +1,11 @@
 import argparse
 import os
 import cv2
+import pandas
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import multiprocessing as mp
 from time import time
 
 
@@ -14,29 +16,43 @@ def process_image(image_path):
 
     non_zero_pixels = np.count_nonzero(image)
     mean_weight = np.mean(image)
+    histogram = np.histogram(image, 256, (0, 256))
 
-    return non_zero_pixels, mean_weight
+    return non_zero_pixels, mean_weight, histogram, image_path
 
 
 def process_directory(root_dir, output_csv_path, verbose):
     results = []
+    weight_distributions = []
+    weight_results = []
+    file_count = 0
 
+    pool = mp.Pool()
     for subdir, _, files in os.walk(root_dir):
-        for file in files:
-            if file.endswith(('.png', '.jpg', '.jpeg', '.bmp', '.tiff')):
-                image_path = os.path.join(subdir, file)
-                try:
-                    non_zero_pixels, mean_weight = process_image(image_path)
-                    results.append((image_path, non_zero_pixels, mean_weight))
-                except Exception as e:
-                    print(f"Error processing {image_path}: {e}")
+        data = pool.map(process_image, [os.path.join(subdir, file) for file in files if
+                                        file.endswith(('.png', '.jpg', '.jpeg', '.bmp', '.tiff'))])
+
+        for row in data:
+            try:
+                results.append((row[3], row[0], row[1]))
+                weight_distributions.append(row[2][0])
+                weight_results.append(list((row[3],)) + list(row[2][0]))
+                file_count += 1
+            except Exception as e:
+                print(f"Error processing {row[3]}: {e}")
+
         if verbose:
-            print(f"Processed directory {os.path.split(subdir)[1]}")
+            print(f"Processed directory: {os.path.split(subdir)[1]}")
+
+    cumulative_histogram = np.divide(np.sum(weight_distributions, axis=0), file_count)
 
     df = pd.DataFrame(results, columns=['filename', 'non_zero_pixels', 'mean_weight'])
-    df.to_csv(os.path.join(str(output_csv_path), root_dir.split(os.sep)[-1]) + ".csv", index=False)
+    df2 = pd.DataFrame(weight_results, columns=['filename'] + [x for x in range(0, 256)])
 
-    return df
+    df.to_csv(os.path.join(str(output_csv_path), root_dir.split(os.sep)[-1]) + ".csv", index=False)
+    df2.to_csv(os.path.join(str(output_csv_path), root_dir.split(os.sep)[-1]) + "_weights.csv", index=False)
+
+    return df, df2, cumulative_histogram
 
 
 def calculate_means(df):
@@ -94,7 +110,7 @@ def plot_subdir_means(merged_df, value_name, dataset_names, output_path):
 
     plt.tight_layout()
     plt.savefig(f'{output_path}/{value_name}.png')
-    #plt.show()
+    # plt.show()
 
 
 # Function to plot the total means
@@ -121,7 +137,38 @@ def plot_total_means(total_means_list, dataset_names, output_path):
 
     plt.tight_layout()
     plt.savefig(f'{output_path}/total_means.png')
-    #plt.show()
+    # plt.show()
+
+
+def plot_weight_distribution(pixel_weights, dataset_names, output_path):
+    for i in range(len(dataset_names)):
+        fig, ax = plt.subplots(figsize=(12, 8))
+
+        ax.set_xlabel('Weight value')
+        ax.set_ylabel('Average number of pixels')
+        ax.set_title(f'Pixel weight distribution - {dataset_names[i]}')
+        ax.set_xticks(np.linspace(0, 255, 18))
+        ax.set_yscale('log')
+        plt.bar(range(256), pixel_weights[i], width=0.8)
+        plt.savefig(f'{output_path}/pixel_weights_{dataset_names[i]}.png')
+
+    bar_width = 0.8 / len(dataset_names)
+    x = np.arange(256)
+
+    fig, ax = plt.subplots(figsize=(24, 8))
+
+    for i in range(len(dataset_names)):
+        ax.bar(x + (i - (len(dataset_names)-1)/2) * bar_width, pixel_weights[i], width=bar_width, label=dataset_names[i])
+
+    ax.set_xlabel('Weight value')
+    ax.set_ylabel('Average number of pixels')
+    ax.set_title('Comparative pixel weight distribution')
+    ax.set_xticks(np.linspace(0, 255, 18))
+    ax.set_yscale('log')
+    ax.legend()
+
+    plt.tight_layout()
+    plt.savefig(f'{output_path}/comparative_pixel_weights.png')
 
 
 if __name__ == "__main__":
@@ -129,7 +176,7 @@ if __name__ == "__main__":
     parser.add_argument('--sources', nargs='+', required=True,
                         help='Source directories of compared datasets.')
     parser.add_argument('--output', type=str, required=True,
-                        help='CSV statistics files output directory.')
+                        help='CSV statistics and image files output directory.')
     parser.add_argument('--verbose', action='store_true',
                         help='Print debug info.')
     args = parser.parse_args()
@@ -142,11 +189,16 @@ if __name__ == "__main__":
 
     dataset_names = []
     df = []
+    df2 = []
+    histograms = []
     results = []
     i = 0
     for source in sources:
         dataset_names.append(source.split(os.path.sep)[-1])
-        df.append(process_directory(source, output_csv_path, verbose))
+        dataframes = process_directory(source, output_csv_path, verbose)
+        df.append(dataframes[0])
+        df2.append(dataframes[1])
+        histograms.append(dataframes[2])
         results.append(calculate_means(df[i]))
         i = i + 1
 
@@ -163,6 +215,9 @@ if __name__ == "__main__":
 
     # Plot total means
     plot_total_means(total_means_series, dataset_names, output_csv_path)
+
+    # Plot cumulative pixel weight distribution
+    plot_weight_distribution(histograms, dataset_names, output_csv_path)
 
     end = time()
     print(f"Finished in {end - start}")
